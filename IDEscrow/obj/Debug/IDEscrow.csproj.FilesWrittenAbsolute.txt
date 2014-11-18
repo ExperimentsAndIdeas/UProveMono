@@ -1,0 +1,15 @@
+/Users/Chris/Desktop/UProve/UProveExtensionsSDK/IDEscrow/obj/Debug/.NETFramework,Version=v4.0.AssemblyAttribute.cs
+/Users/Chris/Desktop/UProve/UProveExtensionsSDK/IDEscrow/bin/Debug/UProveIDEscrow.dll.mdb
+/Users/Chris/Desktop/UProve/UProveExtensionsSDK/IDEscrow/bin/Debug/UProveIDEscrow.dll
+/Users/Chris/Desktop/UProve/UProveExtensionsSDK/IDEscrow/obj/Debug/UProveIDEscrow.dll
+/Users/Chris/Desktop/UProve/UProveExtensionsSDK/IDEscrow/obj/Debug/UProveIDEscrow.dll.mdb
+/Users/Chris/Desktop/UProve/UProveExtensionsSDK/IDEscrow/bin/Debug/bc-trimmed.dll
+/Users/Chris/Desktop/UProve/UProveExtensionsSDK/IDEscrow/bin/Debug/UProveCrypto.dll
+/Users/Chris/Desktop/UProve/UProveExtensionsSDK/IDEscrow/bin/Debug/crypto.dll
+/Users/Chris/Desktop/UProve/UProveExtensionsSDK/IDEscrow/bin/Debug/crypto.xml
+/Users/Chris/Desktop/UProve/UProveExtensionsSDK/IDEscrow/bin/Debug/nunit.core.dll
+/Users/Chris/Desktop/UProve/UProveExtensionsSDK/IDEscrow/bin/Debug/nunit.framework.dll
+/Users/Chris/Desktop/UProve/UProveExtensionsSDK/IDEscrow/bin/Debug/nunit.core.interfaces.dll
+/Users/Chris/Desktop/UProve/UProveExtensionsSDK/IDEscrow/bin/Debug/UProveCrypto.dll.mdb
+/Users/Chris/Desktop/UProve/UProveExtensionsSDK/IDEscrow/bin/Debug/UProveCrypto.xml
+/Users/Chris/Desktop/UProve/UProveExtensionsSDK/IDEscrow/bin/Debug/crypto.dll.mdb

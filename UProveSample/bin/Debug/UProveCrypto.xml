@@ -1,0 +1,3091 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>UProveCrypto</name>
+    </assembly>
+    <members>
+        <member name="T:UProveCrypto.PreIssuanceParameters">
+            <summary>
+            Class that will be extended to create parameters for provers and issuers to use
+            in the collaborative issuance protocol.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.PreIssuanceParameters.IP">
+            The Issuer parameters for the new token</member>
+        <member name="P:UProveCrypto.PreIssuanceParameters.SourceIP">
+            Issuer parameters used to carry-over attributes</member>
+        <member name="P:UProveCrypto.PreIssuanceParameters.Attributes">
+            attribute values for the new token. (this will always have length n, but may have some null attributes for the Issuer)</member>
+        <member name="P:UProveCrypto.PreIssuanceParameters.TI">
+            the token information field for the new token</member>
+        <member name="P:UProveCrypto.PreIssuanceParameters.C">
+            indicies of committed attributes (in new token)</member>
+        <member name="P:UProveCrypto.PreIssuanceParameters.Corig">
+            indicies of committed attributes (in old token(s))</member>
+        <member name="P:UProveCrypto.PreIssuanceParameters.HasCarryOverAttributes">
+            flag indicating that there are carry-over attributes in the proof</member>
+        <member name="P:UProveCrypto.PreIssuanceParameters.U">
+            private attributes known only to the prover (must have ip.e[U[i]] == 0 (not hahsed) for all i)</member>
+        <member name="P:UProveCrypto.PreIssuanceParameters.K">
+            attributes known to both the prover and issuer</member>
+        <member name="M:UProveCrypto.PreIssuanceParameters.Validate">
+            <summary>
+            Validates the parameters object, throws an ArgumentException if they are invalid.
+            </summary>
+        </member>
+        <member name="T:UProveCrypto.ProverPreIssuanceParameters">
+            <summary>
+            Parameters for collaborative issuance used by the Prover.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.ProverPreIssuanceParameters.KeyAndToken">
+            One or more <c>UProveKeyAndToken</c> objects (null for Issuer, set Tokens)</member>
+        <member name="P:UProveCrypto.ProverPreIssuanceParameters.SourceAttributes">
+            Set of attributes corresponding to the token in <c>KeyAndToken</c>, the source for being carried over</member>
+        <member name="P:UProveCrypto.ProverPreIssuanceParameters.DevicePublicKey">
+            The device's public key. Can be <code>null</code>.</member>
+        <member name="M:UProveCrypto.ProverPreIssuanceParameters.#ctor(UProveCrypto.IssuerParameters)">
+            <summary>
+            Create a new set of parameters.  Once created you can set properties
+            of this object to control aspects of the PreIssuanceProof.
+            </summary>
+            <param name="ip">The issuer parameters to be used when creating the proof</param>
+        </member>
+        <member name="M:UProveCrypto.ProverPreIssuanceParameters.Validate">
+            <summary>
+            After setting properties on this PreIssuanceProofParameters object, the Prover
+            should call Validate() to ensure they are correct.
+            </summary>
+            <exception cref="T:System.ArgumentException">Thrown if parameters are invalid.</exception>
+        </member>
+        <member name="M:UProveCrypto.ProverPreIssuanceParameters.CarryOverAttribute(System.Int32[],System.Int32[],UProveCrypto.IssuerParameters,UProveCrypto.UProveKeyAndToken,System.Byte[][])">
+            <summary>
+            Indicates that attributes are carried over from the source token into the new one.
+            </summary>
+            <param name="sourceIndex">The indices of the attributes in the existing token.</param>
+            <param name="destinationIndex">The indices of the attributes in the new token.</param>
+            /// <param name="sourceIP">The Issuer Parameters used to issue the source token. This can be the same as <c>Ip</c> if the
+            same Issuer issues the source and new tokens.</param><param name="sourceKeyAndToken">The source key and token.</param><param name="sourceAttributes">The attributes in the source token.</param></member>
+        <member name="T:UProveCrypto.IssuerPreIssuanceParameters">
+            <summary>
+            Parameters used by the Issuer for collaborative issuance.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.IssuerPreIssuanceParameters.Tokens">
+            The source <c>UProveToken</c> object</member>
+        <member name="P:UProveCrypto.IssuerPreIssuanceParameters.DeviceProtected">
+            True if the new token will be device protected</member>
+        <member name="M:UProveCrypto.IssuerPreIssuanceParameters.#ctor(UProveCrypto.IssuerParameters)">
+            <summary>
+            Create parameters.
+            </summary>
+            <param name="ip">The issuer parameters to be used for collaborative issuance.</param>
+        </member>
+        <member name="M:UProveCrypto.IssuerPreIssuanceParameters.Validate">
+            <summary>
+            After setting properties on this PreIssuanceProofParameters object, the Prover
+            should call Validate() to ensure they are correct.
+            </summary>
+            <returns>
+            </returns>
+        </member>
+        <member name="M:UProveCrypto.IssuerPreIssuanceParameters.CarryOverAttribute(System.Int32[],System.Int32[],UProveCrypto.IssuerParameters,UProveCrypto.UProveToken)">
+            <summary>
+            Indicates that attributes are carried over from the source token into the new one.
+            </summary>
+            <param name="sourceIndex">The indices of the attributes in the existing token.</param>
+            <param name="destinationIndex">The indices of the attributes in the new token.</param>
+            /// <param name="sourceIP">The Issuer Parameters used to issue the source token. This can be the same as <c>Ip</c> if the
+            same Issuer issues the source and new tokens.</param><param name="sourceToken">The source token.</param></member>
+        <member name="T:UProveCrypto.PreIssuanceProof">
+            <summary>
+            A class to create and verify proofs used with collaborative issuance.
+            These proofs are created by the Prover, and verified by the Issuer, to
+            provide assurance to the Issuer that the tokens being created have valid
+            attributes, even if the Issuer does not see these attributes.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.PreIssuanceProof.CreateProof(UProveCrypto.ProverPreIssuanceParameters,UProveCrypto.Math.FieldZqElement@,System.Byte[])">
+            <summary>
+            Create a new pre-issuance proof.
+            </summary>
+            <param name="pipp">The prover parameters.</param>
+            <param name="beta0">The random blinding value used to create the proof, output so that the prover can use it during the issuance protocol</param>
+            <param name="message">An optional message to sign while creating the proof.</param>
+            <returns>
+            </returns>
+        </member>
+        <member name="M:UProveCrypto.PreIssuanceProof.VerifyProof(UProveCrypto.IssuerPreIssuanceParameters,UProveCrypto.PreIssuanceProof,System.Byte[])">
+            <summary>
+            Verifies a pre-issuance proof and returns the element gamma needed for collaborative issuance.
+            </summary>
+            <param name="ipip">The pre-issuance proof parameters for the Issuer</param>
+            <param name="proof">The proof to be verified</param>
+            <param name="message">An optional message to be verified (must match the one signed by the prover)</param>
+            <returns>The group element <c>gamma^beta0</c>, a blinded version of the element gamma used during token issuance.</returns>
+            <exception cref="T:UProveCrypto.InvalidUProveArtifactException">Thrown if the proof is invalid.</exception>
+        </member>
+        <member name="M:UProveCrypto.PreIssuanceProof.GetBlindedGamma">
+            <summary>
+            Returns the blinded gamma value created during this pre-issuance proof.
+            The Prover will typically call this method to retrive the blinded gamma
+            value from this PreIssuanceProof.
+            The Issuer should not use this method to access the blinded gamma value,
+            since the proof must be verified, and VerifyProof returns this value
+            if verification is successful.
+            </summary>
+            <returns>A blinded version of gamma; i.e., gamma^beta0.</returns>
+        </member>
+        <member name="T:UProveCrypto.GroupType">
+            <summary>
+            Defines the supported group constructions: Subgroup and ECC.
+            </summary>
+        </member>
+        <member name="F:UProveCrypto.GroupType.Subgroup">
+            <summary>
+            A group which uses the Subgroup construction.
+            </summary>
+        </member>
+        <member name="F:UProveCrypto.GroupType.ECC">
+            <summary>
+            A group which uses the Elliptic Curve construction.
+            </summary>
+        </member>
+        <member name="T:UProveCrypto.Math.BC.ECGroupBCImpl">
+            <summary>
+            Represents a group Gq using the elliptic curve construction.
+            </summary>
+        </member>
+        <member name="F:UProveCrypto.Math.BC.ECGroupBCImpl.encoding">
+            <summary>
+            UTF-8 encoder for use with serialization.
+            </summary>
+        </member>
+        <member name="F:UProveCrypto.Math.BC.ECGroupBCImpl.hash">
+            <summary>
+            The HashFunction used to derive group elements.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.Math.BC.ECGroupBCImpl.HashAlg">
+            <summary>
+            The hash function used to derive group elements. Defaults to <code>SHA-256</code>.
+            </summary>
+        </member>
+        <member name="F:UProveCrypto.Math.BC.ECGroupBCImpl.hashByteSize">
+            <summary>
+            The hash byte size.
+            </summary>
+        </member>
+        <member name="F:UProveCrypto.Math.BC.ECGroupBCImpl.domainParams">
+            <summary>
+            The domain parameters object for the elliptic curve.
+            </summary>
+        </member>
+        <member name="F:UProveCrypto.Math.BC.ECGroupBCImpl.curve">
+            <summary>
+            The curve object itself.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.Math.BC.ECGroupBCImpl.#ctor(System.Byte[],System.Byte[],System.Byte[],System.Byte[],System.Byte[],System.Byte[],System.String,System.String)">
+            <summary>
+            Constructs an ECCGroup.
+            <param name="p">The p parameter, representing the prime field domain for the
+            x and y coordinate spaces.</param><param name="a">The a parameter for the eliptic curve.</param><param name="b">The b parameter for the eliptic curve.</param><param name="g_x">The x coordinate of the generator point.</param><param name="g_y">The y coordinate of the generator point.</param><param name="n">The order of the group.</param><param name="groupName">The known name of the group, or null.</param><param name="curveName">The known name of the curve, or null.</param></summary>
+        </member>
+        <member name="P:UProveCrypto.Math.BC.ECGroupBCImpl.G">
+            <summary>
+            The generator element.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.Math.BC.ECGroupBCImpl.Q">
+            <summary>
+            The parameter Q as a big-endian byte array.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.Math.BC.ECGroupBCImpl.ValidateGroupElement(UProveCrypto.GroupElement)">
+            <summary>
+            Verifies if e is a group element.
+            </summary>
+            <param name="e">The element to test.</param>
+            <exception cref="T:UProveCrypto.InvalidUProveArtifactException">Thrown if i is not in the group.</exception>
+        </member>
+        <member name="M:UProveCrypto.Math.BC.ECGroupBCImpl.CreateGroupElement(System.Byte[])">
+            <summary>
+            Returns the group element encoded in byte array.
+            </summary>
+            <param name="value">A byte array encoding a group element.</param>
+            <returns>A group element.</returns>
+        </member>
+        <member name="M:UProveCrypto.Math.BC.ECGroupBCImpl.CreateGroupElement(System.Byte[],System.Byte[])">
+            <summary>
+            Returns the group element encoded as two byte arrays, one for
+            each coordinate.
+            </summary>
+            <param name="x">A byte array encoding the x coordinate.</param>
+            <param name="y">A byte array encoding the y coordinate.</param>
+            <returns>A group element.</returns>
+        </member>
+        <member name="M:UProveCrypto.Math.BC.ECGroupBCImpl.UpdateHash(UProveCrypto.HashFunction)">
+            <summary>
+            Updates the specified hash function with the group description elements.
+            </summary>
+            <param name="h">An hash function object.</param>
+        </member>
+        <member name="M:UProveCrypto.Math.BC.ECGroupBCImpl.Verify">
+            <summary>
+            Verifies that the group is correctly constructed.
+            </summary>
+            <exception cref="T:UProveCrypto.InvalidUProveArtifactException">
+            Thrown if the group parameters are invalid.</exception>
+        </member>
+        <member name="P:UProveCrypto.Math.BC.ECGroupBCImpl.Identity">
+            <summary>
+            Returns the identity element in the group.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.Math.BC.ECGroupBCImpl.DeriveElement(System.Byte[],System.Byte,System.Int32@)">
+            <summary>
+            Derives an unpredictable element of the group, using the input. Each
+            construction defines its own derivation mechanism, but each takes an
+            optional context string and an index, and returns a counter. Calling
+            this method with the same parameter values returns the same element
+            and counter, calling it with a different context or index value must
+            return a different element.
+            </summary>
+            <param name="context">An optional context used by the derivation
+            mechanism, can be null.</param>
+            <param name="index">An 8-bit integer index value.</param>
+            <param name="counter">A counter value indicating the state at which the
+            derivation mechanism stopped.</param>
+            <returns>A random group element.</returns>
+        </member>
+        <member name="M:UProveCrypto.Math.BC.ECGroupBCImpl.MultiExponentiate(UProveCrypto.GroupElement[],UProveCrypto.Math.FieldZqElement[])">
+            <summary>
+            Bouncy castle implementation of multi-exponentiation.
+            </summary>
+            <param name="g">bases</param>
+            <param name="f">exponents</param>
+            <returns>
+            </returns>
+        </member>
+        <member name="M:UProveCrypto.Math.BC.ECGroupBCImpl.Equals(System.Object)">
+            <summary>
+            Returns a value indiciating whether this instance is equal to the
+            specified object.
+            </summary>
+            <param name="o">An object to compare to this instance.</param>
+            <returns>True if this object equals the other object.</returns>
+        </member>
+        <member name="M:UProveCrypto.Math.BC.ECGroupBCImpl.GetHashCode">
+            <summary>
+            Returns the hashcode for this instance.
+            </summary>
+            <returns>The hashcode for this instance.</returns>
+        </member>
+        <member name="T:UProveCrypto.Math.BC.ECGroupElementBCImpl">
+            <summary>
+            An element of a group using the elliptic curve construction.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.Math.BC.ECGroupElementBCImpl.Point">
+            <summary>
+            A Bouncy Castle FpPoint representing the point.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.Math.BC.ECGroupElementBCImpl.#ctor(Org.BouncyCastle.Math.EC.FpPoint)">
+            <summary>
+            Create an ECGroupElementBCImpl object.
+            </summary>
+            <param name="point">A Bouncy Castle FpPoint object.</param>
+        </member>
+        <member name="M:UProveCrypto.Math.BC.ECGroupElementBCImpl.Exponentiate(UProveCrypto.Math.FieldZqElement)">
+            <summary>
+            Returns <code>this^exponent</code>.
+            </summary>
+            <param name="exponent">The exponent.</param>
+            <returns>A group element.</returns>
+        </member>
+        <member name="M:UProveCrypto.Math.BC.ECGroupElementBCImpl.Multiply(UProveCrypto.GroupElement)">
+            <summary>
+            Returns <code>this*a</code>.
+            </summary>
+            <param name="a">The operand.</param>
+            <returns>A group element.</returns>
+        </member>
+        <member name="M:UProveCrypto.Math.BC.ECGroupElementBCImpl.Equals(System.Object)">
+            <summary>
+            Returns a value indiciating whether this instance is equal to the
+            specified object.
+            </summary>
+            <param name="o">An object to compare to this instance.</param>
+            <returns>True if this object equals the other object.</returns>
+        </member>
+        <member name="M:UProveCrypto.Math.BC.ECGroupElementBCImpl.GetHashCode">
+            <summary>
+            Returns the hashcode for this instance.
+            </summary>
+            <returns>The hashcode for this instance.</returns>
+        </member>
+        <member name="M:UProveCrypto.Math.BC.ECGroupElementBCImpl.UpdateHash(UProveCrypto.HashFunction)">
+            <summary>
+            Updates the specified hash function with the group element.
+            </summary>
+            <param name="h">An instanciated hash function.</param>
+        </member>
+        <member name="M:UProveCrypto.Math.BC.ECGroupElementBCImpl.GetEncoded">
+            <summary>
+            Returns an encoded group element. The element can be parsed by calling
+            the corresponding group's <code>CreateGroupElement</code> method.
+            </summary>
+            <returns>Encoded group element.</returns>
+        </member>
+        <member name="T:UProveCrypto.Math.BC.FieldZqElementBCImpl">
+            <summary>
+            Represents an element in a prime field. This implementation uses the
+            Bouncy Castle big integer API's.
+            </summary>
+        </member>
+        <member name="F:UProveCrypto.Math.BC.FieldZqElementBCImpl.i">
+            <summary>
+            A Bouncy Castle BigInteger representing the value of this element.
+            </summary>
+        </member>
+        <member name="F:UProveCrypto.Math.BC.FieldZqElementBCImpl.field">
+            <summary>
+            A FieldZqBCImpl object representing the field to which this element
+            belongs.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.Math.BC.FieldZqElementBCImpl.#ctor(Org.BouncyCastle.Math.BigInteger,UProveCrypto.Math.BC.FieldZqBCImpl)">
+            <summary>
+            Internal only constructor for a Bouncy Castle based field Zq element.
+            </summary>
+            <param name="i">The value of the element.</param>
+            <param name="field">The field to which the element belongs.</param>
+        </member>
+        <member name="M:UProveCrypto.Math.BC.FieldZqElementBCImpl.Invert">
+            <summary>
+            Returns the inverse of the element with respect to the field.
+            </summary>
+            <returns>The inverse of the element with respect to the field.</returns>
+        </member>
+        <member name="M:UProveCrypto.Math.BC.FieldZqElementBCImpl.Negate">
+            <summary>
+            Returns the negation of the Zq element, i.e., the additive inverse mod q.
+            </summary>
+            <returns>-i mod q</returns>
+        </member>
+        <member name="M:UProveCrypto.Math.BC.FieldZqElementBCImpl.Multiply(UProveCrypto.Math.FieldZqElement)">
+            <summary>
+            Multiply this element by the element e.
+            </summary>
+            <param name="e">The value to multiply this value by.</param>
+            <returns>The value of this * e.</returns>
+        </member>
+        <member name="M:UProveCrypto.Math.BC.FieldZqElementBCImpl.Add(UProveCrypto.Math.FieldZqElement)">
+            <summary>
+            Add the value to this value and return the result.
+            </summary>
+            <param name="e">The value to add to this value.</param>
+            <returns>This value plus e.</returns>
+        </member>
+        <member name="M:UProveCrypto.Math.BC.FieldZqElementBCImpl.ModPow(UProveCrypto.Math.FieldZqElement)">
+            <summary>
+            Exponentiate this value to the exponent power.
+            </summary>
+            <param name="exponent">The exponent to raise this value to.</param>
+            <returns>This value to the exponent power.</returns>
+        </member>
+        <member name="M:UProveCrypto.Math.BC.FieldZqElementBCImpl.Equals(System.Object)">
+            <summary>
+            Returns a value indiciating whether this instance is equal to the
+            specified object.
+            </summary>
+            <param name="o">An object to compare to this instance.</param>
+            <returns>True if this object equals the other object.</returns>
+        </member>
+        <member name="M:UProveCrypto.Math.BC.FieldZqElementBCImpl.GetHashCode">
+            <summary>
+            Returns the hashcode for this instance.
+            </summary>
+            <returns>The hashcode for this instance.</returns>
+        </member>
+        <member name="M:UProveCrypto.Math.BC.FieldZqElementBCImpl.ToString">
+            <summary>
+            Returns a string representation of this object.
+            </summary>
+            <returns>A string representation of this object.</returns>
+        </member>
+        <member name="M:UProveCrypto.Math.BC.FieldZqElementBCImpl.ToByteArray">
+            <summary>
+            Converts a FieldElement into a big-endian byte representaion.
+            </summary>
+            <returns>A byte array encoding the field element value.</returns>
+        </member>
+        <member name="T:UProveCrypto.Math.BC.FieldZqBCImpl">
+            <summary>
+            Represents the field Zq.
+            </summary>
+        </member>
+        <member name="F:UProveCrypto.Math.BC.FieldZqBCImpl.rngCSP">
+            <summary>
+            A .Net RNGCSP for generating cryptographic random numbers.
+            </summary>
+        </member>
+        <member name="F:UProveCrypto.Math.BC.FieldZqBCImpl.TwoToTheX">
+            <summary>
+            A dictionary of (x, 2^x) values.
+            </summary>
+        </member>
+        <member name="F:UProveCrypto.Math.BC.FieldZqBCImpl.modulusBytes">
+            <summary>
+            The value of the modulus in big endian form.
+            </summary>
+        </member>
+        <member name="F:UProveCrypto.Math.BC.FieldZqBCImpl.modulus">
+            <summary>
+            The modulus as a Bouncy Castle BigInteger.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.Math.BC.FieldZqBCImpl.#ctor(System.Byte[])">
+            <summary>
+            Constructs a FieldZqImpl.
+            </summary>
+            <param name="modulus">The field modulus</param>
+        </member>
+        <member name="M:UProveCrypto.Math.BC.FieldZqBCImpl.GetElement(System.UInt32)">
+            <summary>
+            Construct a FieldZqElement with the value given.
+            </summary>
+            <param name="value">An integer less than the modulus.</param>
+            <returns>A new FieldZqElement from this field with the given value.</returns>
+        </member>
+        <member name="M:UProveCrypto.Math.BC.FieldZqBCImpl.GetElement(System.Byte[])">
+            <summary>
+            Construct a FieldZqElement with the value given.
+            </summary>
+            <param name="value">A byte array representing the value in big endian order.</param>
+            <returns>A new FieldZqElement from this field with the given value.</returns>
+        </member>
+        <member name="M:UProveCrypto.Math.BC.FieldZqBCImpl.GetRandomElement(System.Boolean,System.Int32)">
+            <summary>
+            Generates a random Zq element.
+            </summary>
+            <param name="nonZero">True to return a non-zero element.</param>
+            <param name="maxBitLength">Maximum lenght of the random element, or -1 for full size elements.</param>
+            <returns>A random Zq element.</returns>
+        </member>
+        <member name="M:UProveCrypto.Math.BC.FieldZqBCImpl.GetElementFromDigest(System.Byte[])">
+            <summary>
+            Transforms a hash digest into a Zq element. The digest is interpreted as an unsigned
+            integer in big-endian byte order modulo q.
+            </summary>
+            <param name="digest">A digest value.</param>.
+            <returns>A Zq element.</returns></member>
+        <member name="M:UProveCrypto.Math.BC.FieldZqBCImpl.IsElement(UProveCrypto.Math.FieldZqElement)">
+            <summary>
+            Returns true if the given element is an element from this field.
+            </summary>
+            <param name="element">The element to check.</param>
+            <returns>True if the given element is an element from this field.</returns>
+        </member>
+        <member name="M:UProveCrypto.Math.BC.FieldZqBCImpl.GetRandomValue(Org.BouncyCastle.Math.BigInteger)">
+            <summary>
+            Returns a random BigInteger x such that 0 &lt;= x &lt; max.
+            </summary>
+            <param name="max">Maximal value (exclusive).</param>
+            <returns>A random BigInteger.</returns>
+        </member>
+        <member name="T:UProveCrypto.Math.ECGroup">
+            <summary>
+            Defines a elliptic-curve group.
+            </summary>
+        </member>
+        <member name="F:UProveCrypto.Math.ECGroup.p">
+            <summary>
+            The p parameter, representing the prime field domain for the x
+            and y coordinate spaces.
+            </summary>
+        </member>
+        <member name="F:UProveCrypto.Math.ECGroup.a">
+            <summary>
+            The a parameter for the eliptic curve.
+            </summary>
+        </member>
+        <member name="F:UProveCrypto.Math.ECGroup.b">
+            <summary>
+            The b parameter for the eliptic curve.
+            </summary>
+        </member>
+        <member name="F:UProveCrypto.Math.ECGroup.q">
+            <summary>
+            The order of the curve.
+            </summary>
+        </member>
+        <member name="F:UProveCrypto.Math.ECGroup.curveName">
+            <summary>
+            The known name of the curve, or null.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.Math.ECGroup.#ctor(System.Byte[],System.Byte[],System.Byte[],System.Byte[],System.Byte[],System.Byte[],System.String,System.String)">
+            <summary>
+            Constructs a ECGroup.
+            <param name="p">The p parameter, representing the prime field domain for the x and y coordinate spaces.</param><param name="a">The a parameter for the eliptic curve.</param><param name="b">The b parameter for the eliptic curve.</param><param name="g_x">The x coordinate of the generator point.</param><param name="g_y">The y coordinate of the generator point.</param><param name="n">The order of the group.</param><param name="groupName">The known name of the group, or null.</param><param name="curveName">The known name of the curve, or null.</param></summary>
+        </member>
+        <member name="M:UProveCrypto.Math.ECGroup.CreateECGroup(System.Byte[],System.Byte[],System.Byte[],System.Byte[],System.Byte[],System.Byte[],System.String,System.String)">
+            <summary>
+            Creates an ECCGroup.
+            <param name="p">The p parameter, representing the prime field domain for the x and y coordinate spaces.</param><param name="a">The a parameter for the eliptic curve.</param><param name="b">The b parameter for the eliptic curve.</param><param name="g_x">The x coordinate of the generator point.</param><param name="g_y">The y coordinate of the generator point.</param><param name="n">The order of the group.</param><param name="groupName">The known name of the group, or null.</param><param name="curveName">The known name of the curve, or null.</param></summary>
+        </member>
+        <member name="M:UProveCrypto.Math.ECGroup.CreateGroupElement(System.Byte[],System.Byte[])">
+            <summary>
+            Creates a group element (curve point) from a (x,y) coordinate.
+            </summary>
+            <param name="x">The x-coordinate.</param>
+            <param name="y">The y-coordinate.</param>
+            <returns>
+            </returns>
+        </member>
+        <member name="T:UProveCrypto.Math.ECGroupElement">
+            <summary>
+            An element of a group using the elliptic curve construction.
+            </summary>
+        </member>
+        <member name="T:UProveCrypto.ECParameterSets">
+            <summary>
+            Class for U-Prove subgoup paramters.  See ParameterSet for more documentation.
+            </summary>
+        </member>
+        <member name="F:UProveCrypto.ECParameterSets.ParamSet_EC_P256_V1Name">
+            <summary> OID for P-256</summary>
+        </member>
+        <member name="F:UProveCrypto.ECParameterSets.ParamSet_EC_P384_V1Name">
+            <summary> OID for P-384</summary>
+        </member>
+        <member name="F:UProveCrypto.ECParameterSets.ParamSet_EC_P521_V1Name">
+            <summary> OID for P-521</summary>
+        </member>
+        <member name="F:UProveCrypto.ECParameterSets.ParamSet_EC_BN254_V1Name">
+            <summary> OID for BN 254</summary>
+        </member>
+        <member name="P:UProveCrypto.ECParameterSets.ParamSet_EC_P256_V1">
+            <summary>Recommended EC parameter set P-256.</summary>
+        </member>
+        <member name="P:UProveCrypto.ECParameterSets.ParamSet_EC_P384_V1">
+            <summary>Recommended EC parameter set P-384.</summary>
+        </member>
+        <member name="P:UProveCrypto.ECParameterSets.ParamSet_EC_P521_V1">
+            <summary>Recommended EC parameter set P-521.</summary>
+        </member>
+        <member name="P:UProveCrypto.ECParameterSets.ParamSet_EC_BN254_V1">
+            <summary>Recommended EC parameter set BN 254.</summary>
+        </member>
+        <member name="T:UProveCrypto.ExtensionMethods">
+            <summary>
+            Serialization Extension methods to simplify the Base64 encoding that we do all over the place
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.ExtensionMethods.ToBase64String(System.Byte[])">
+            <summary>
+            Convert a byte[] to a base64 representation.
+            </summary>
+            <param name="bytes">The value to convert.</param>
+            <returns>The base64 representation.</returns>
+        </member>
+        <member name="M:UProveCrypto.ExtensionMethods.ToBase64String(System.Int32)">
+            <summary>
+            Convert an int to a base64 representation.
+            </summary>
+            <param name="integer">The value to convert.</param>
+            <returns>The base64 representation.</returns>
+        </member>
+        <member name="M:UProveCrypto.ExtensionMethods.ToBase64String(UProveCrypto.GroupElement)">
+            <summary>
+            Convert a GroupElement to a base64 representation.
+            </summary>
+            <param name="groupElement">The value to convert.</param>
+            <returns>The base64 representation.</returns>
+        </member>
+        <member name="M:UProveCrypto.ExtensionMethods.ToBase64String(UProveCrypto.Math.FieldZqElement)">
+            <summary>
+            Convert a FieldElement to a base64 representation.
+            </summary>
+            <param name="fieldElement">The value to convert.</param>
+            <returns>The base64 representation.</returns>
+        </member>
+        <member name="M:UProveCrypto.ExtensionMethods.ToBase64StringArray(UProveCrypto.GroupElement[])">
+            <summary>
+            Convert a GroupElement[] to a base64 representation.
+            </summary>
+            <param name="groupElements">The value to convert.</param>
+            <returns>The base64 representation.</returns>
+        </member>
+        <member name="M:UProveCrypto.ExtensionMethods.ToBase64StringArray(UProveCrypto.Math.FieldZqElement[])">
+            <summary>
+            Convert a fieldElement[] to a base64 representation.
+            </summary>
+            <param name="fieldElements">The value to convert.</param>
+            <returns>The base64 representation.</returns>
+        </member>
+        <member name="M:UProveCrypto.ExtensionMethods.ToByteArray(System.String)">
+            <summary>
+            Convert a base64 string to a byte[].
+            </summary>
+            <param name="encodedString">The encoded string to convert.</param>
+            <returns>The converted object.</returns>
+        </member>
+        <member name="M:UProveCrypto.ExtensionMethods.ToInt(System.String)">
+            <summary>
+            Convert a base64 string to an int.
+            </summary>
+            <param name="encodedString">The encoded string to convert.</param>
+            <returns>The converted object.</returns>
+        </member>
+        <member name="M:UProveCrypto.ExtensionMethods.ToFieldElement(System.String,UProveCrypto.IssuerParameters)">
+            <summary>
+            Convert a base64 string to a FieldElement using FieldZq from a particular IssuerParameters object.
+            </summary>
+            <param name="encodedString">The encoded string to convert.</param>
+            <param name="issuerParameters">The IssuerParameters object.</param>
+            <returns>The converted object.</returns>
+        </member>
+        <member name="M:UProveCrypto.ExtensionMethods.ToFieldZqElement(System.String,UProveCrypto.Math.FieldZq)">
+            <summary>
+            Convert a base64 string to a FieldElement.
+            </summary>
+            <param name="encodedString">The encoded string to convert.</param>
+            <param name="Zq">The FieldZq object to which the encoded element belongs.</param>
+            <returns>The converted object.</returns>
+        </member>
+        <member name="M:UProveCrypto.ExtensionMethods.ToGroupElement(System.String,UProveCrypto.IssuerParameters)">
+            <summary>
+            Convert a base64 string to a GroupElement using Gq from an IssuerParameters object.
+            </summary>
+            <param name="encodedString">The encoded string to convert.</param>
+            <param name="issuerParameters">The issuer parameters object to use for conversion.</param>
+            <returns>The converted object.</returns>
+        </member>
+        <member name="M:UProveCrypto.ExtensionMethods.ToGroupElement(System.String,UProveCrypto.Group)">
+            <summary>
+            Convert a base64 string to a GroupElement using a specific Group object.
+            </summary>
+            <param name="encodedString">The encoded string to convert.</param>
+            <param name="group">The group object to use.</param>
+            <returns>The converted object.</returns>
+        </member>
+        <member name="M:UProveCrypto.ExtensionMethods.ToGroupElementArray(System.String[],UProveCrypto.Group)">
+            <summary>
+            Convert a base64 string to a GroupElement[] using a specific Group object.
+            </summary>
+            <param name="encodedElements">The encoded string to convert.</param>
+            <param name="group">The group object to use.</param>
+            <returns>The converted object.</returns>
+        </member>
+        <member name="M:UProveCrypto.ExtensionMethods.ToFieldElementArray(System.String[],UProveCrypto.Math.FieldZq)">
+            <summary>
+            Convert a base64 string to a FieldElement[] using a specific FieldZq object.
+            </summary>
+            <param name="encodedElements">The encoded string to convert.</param>
+            <param name="Zq">The fieldZq object to use.</param>
+            <returns>The converted object.</returns>
+        </member>
+        <member name="T:UProveCrypto.Math.FieldZqElement">
+            <summary>
+            Abstract type representing an element in a prime field.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.Math.FieldZqElement.op_Addition(UProveCrypto.Math.FieldZqElement,UProveCrypto.Math.FieldZqElement)">
+            <summary>
+            Returns <code>a+b</code>.
+            </summary>
+            <param name="a">First operand.</param>
+            <param name="b">Second operand.</param>
+            <returns>A field element.</returns>
+        </member>
+        <member name="M:UProveCrypto.Math.FieldZqElement.op_Subtraction(UProveCrypto.Math.FieldZqElement,UProveCrypto.Math.FieldZqElement)">
+            <summary>
+            Returns <code>a-b</code>.
+            </summary>
+            <param name="a">First operand.</param>
+            <param name="b">Second operand.</param>
+            <returns>A field element.</returns>
+        </member>
+        <member name="M:UProveCrypto.Math.FieldZqElement.op_Multiply(UProveCrypto.Math.FieldZqElement,UProveCrypto.Math.FieldZqElement)">
+            <summary>
+            Returns <code>a*b</code>.
+            </summary>
+            <param name="a">First operand.</param>
+            <param name="b">Second operand.</param>
+            <returns>A field element.</returns>
+        </member>
+        <member name="M:UProveCrypto.Math.FieldZqElement.op_Division(UProveCrypto.Math.FieldZqElement,UProveCrypto.Math.FieldZqElement)">
+            <summary>
+            Returns <code>a/b</code>.
+            </summary>
+            <param name="a">First operand.</param>
+            <param name="b">Second operand.</param>
+            <returns>A field element.</returns>
+        </member>
+        <member name="M:UProveCrypto.Math.FieldZqElement.op_Equality(UProveCrypto.Math.FieldZqElement,UProveCrypto.Math.FieldZqElement)">
+            <summary>
+            Returns true if <code>a == b</code>, false otherwise.
+            </summary>
+            <param name="a">First operand.</param>
+            <param name="b">Second operand.</param>
+            <returns>True if <code>a == b</code>.</returns>
+        </member>
+        <member name="M:UProveCrypto.Math.FieldZqElement.op_Inequality(UProveCrypto.Math.FieldZqElement,UProveCrypto.Math.FieldZqElement)">
+            <summary>
+            Returns true if <code>a != b</code>, false otherwise.
+            </summary>
+            <param name="a">First operand.</param>
+            <param name="b">Second operand.</param>
+            <returns>True if <code>a != b</code>.</returns>
+        </member>
+        <member name="M:UProveCrypto.Math.FieldZqElement.Invert">
+            <summary>
+            Returns the inverse of the element with respect to the field.
+            </summary>
+            <returns>The inverse of the element with respect to the field.</returns>
+        </member>
+        <member name="M:UProveCrypto.Math.FieldZqElement.Negate">
+            <summary>
+            Negate this elemnt mod q.
+            </summary>
+            <returns>-this mod q</returns>
+        </member>
+        <member name="M:UProveCrypto.Math.FieldZqElement.Multiply(UProveCrypto.Math.FieldZqElement)">
+            <summary>
+            Multiply this element by the element e.
+            </summary>
+            <param name="e">The value to multiply this value by.</param>
+            <returns>The value of this * e.</returns>
+        </member>
+        <member name="M:UProveCrypto.Math.FieldZqElement.Divide(UProveCrypto.Math.FieldZqElement)">
+            <summary>
+            Divide this element by the element e. Does not check for division
+            by 0 errors.
+            </summary>
+            <param name="e">The value to divide this value by.</param>
+            <returns>The value of this / e</returns>
+        </member>
+        <member name="M:UProveCrypto.Math.FieldZqElement.Add(UProveCrypto.Math.FieldZqElement)">
+            <summary>
+            Add the value to this value and return the result.
+            </summary>
+            <param name="e">The value to add to this value.</param>
+            <returns>This value plus e.</returns>
+        </member>
+        <member name="M:UProveCrypto.Math.FieldZqElement.Subtract(UProveCrypto.Math.FieldZqElement)">
+            <summary>
+            Subtracts e from this value and returns the result.
+            </summary>
+            <param name="e">The value to subtract from this value.</param>
+            <returns>This value minus e.</returns>
+        </member>
+        <member name="M:UProveCrypto.Math.FieldZqElement.ModPow(UProveCrypto.Math.FieldZqElement)">
+            <summary>
+            Exponentiate this value to the exponent power.
+            </summary>
+            <param name="exponent">The exponent to raise this value to.</param>
+            <returns>This value to the exponent power.</returns>
+        </member>
+        <member name="M:UProveCrypto.Math.FieldZqElement.ToByteArray">
+            <summary>
+            Converts a FieldElement into a big-endian byte representaion.
+            </summary>
+            <returns>A byte array encoding the field element value.</returns>
+        </member>
+        <member name="M:UProveCrypto.Math.FieldZqElement.GetHashCode">
+            <summary>
+            Returns the hashcode for this instance.
+            </summary>
+            <returns>The hashcode for this instance.</returns>
+        </member>
+        <member name="M:UProveCrypto.Math.FieldZqElement.Equals(System.Object)">
+            <summary>
+            Returns a value indiciating whether this instance is equal to the
+            specified object.
+            </summary>
+            <param name="o">An object to compare to this instance.</param>
+            <returns>True if this object equals the other object.</returns>
+        </member>
+        <member name="T:UProveCrypto.GroupElement">
+            <summary>
+            Represents an element of Gq.
+            The group operation uses the multiplication notation.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.GroupElement.op_Multiply(UProveCrypto.GroupElement,UProveCrypto.GroupElement)">
+            <summary>
+            Returns <code>a*b</code>.
+            </summary>
+            <param name="a">First operand.</param>
+            <param name="b">Second operand.</param>
+            <returns>A group element.</returns>
+        </member>
+        <member name="M:UProveCrypto.GroupElement.op_Equality(UProveCrypto.GroupElement,UProveCrypto.GroupElement)">
+            <summary>
+            Returns true if <code>a == b</code>, false otherwise.
+            </summary>
+            <param name="a">First operand.</param>
+            <param name="b">Second operand.</param>
+            <returns>True if <code>a == b</code>.</returns>
+        </member>
+        <member name="M:UProveCrypto.GroupElement.op_Inequality(UProveCrypto.GroupElement,UProveCrypto.GroupElement)">
+            <summary>
+            Returns true if <code>a != b</code>, false otherwise.
+            </summary>
+            <param name="a">First operand.</param>
+            <param name="b">Second operand.</param>
+            <returns>True if <code>a != b</code>.</returns>
+        </member>
+        <member name="M:UProveCrypto.GroupElement.Exponentiate(UProveCrypto.Math.FieldZqElement)">
+            <summary>
+            Returns <code>this^exponent</code>.
+            </summary>
+            <param name="exponent">The exponent.</param>
+            <returns>A group element.</returns>
+        </member>
+        <member name="M:UProveCrypto.GroupElement.Multiply(UProveCrypto.GroupElement)">
+            <summary>
+            Returns <code>this*a</code>.
+            </summary>
+            <param name="a">The operand.</param>
+            <returns>A group element.</returns>
+        </member>
+        <member name="M:UProveCrypto.GroupElement.Equals(System.Object)">
+            <summary>
+            Returns a value indiciating whether this instance is equal to the
+            specified object.
+            </summary>
+            <param name="obj">An object to compare to this instance.</param>
+            <returns>True if this object equals the other object.</returns>
+        </member>
+        <member name="M:UProveCrypto.GroupElement.GetHashCode">
+            <summary>
+            Returns the hashcode for this instance.
+            </summary>
+            <returns>The hashcode for this instance.</returns>
+        </member>
+        <member name="M:UProveCrypto.GroupElement.UpdateHash(UProveCrypto.HashFunction)">
+            <summary>
+            Updates the specified hash function with the group element.
+            </summary>
+            <param name="h">An instanciated hash function.</param>
+        </member>
+        <member name="M:UProveCrypto.GroupElement.GetEncoded">
+            <summary>
+            Returns an encoded group element. The element can be parsed by calling
+            the corresponding group's <code>CreateGroupElement</code> method.
+            </summary>
+            <returns>Encoded group element.</returns>
+        </member>
+        <member name="T:UProveCrypto.FirstIssuanceMessage">
+            <summary>
+            Class to hold values in the first message of the issuance protocol.
+            Sent from Issuer to Prover.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.FirstIssuanceMessage.sigmaZ">
+            <summary> The protocol value sigma_z </summary>
+        </member>
+        <member name="P:UProveCrypto.FirstIssuanceMessage.sigmaA">
+            <summary> The protocol value sigma_a </summary>
+        </member>
+        <member name="P:UProveCrypto.FirstIssuanceMessage.sigmaB">
+            <summary> The protocol value sigma_b </summary>
+        </member>
+        <member name="M:UProveCrypto.FirstIssuanceMessage.#ctor(UProveCrypto.GroupElement,UProveCrypto.GroupElement[],UProveCrypto.GroupElement[])">
+            <summary>
+            Create a first issuance message. Notation defined in the U-Prove spec.
+            </summary>
+        </member>
+        <member name="T:UProveCrypto.SecondIssuanceMessage">
+            <summary>
+            Class to hold values in the second message of the issuance protocol.
+            Sent from Prover to Issuer.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.SecondIssuanceMessage.sigmaC">
+            <summary>
+            The sigma_c protocol value.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.SecondIssuanceMessage.#ctor(UProveCrypto.Math.FieldZqElement[])">
+            <summary>
+            Create a second issuance message. Notation defined in the U-Prove spec.
+            </summary>
+        </member>
+        <member name="T:UProveCrypto.ThirdIssuanceMessage">
+            <summary>
+            Class to hold values in the third message of the issuance protocol.
+            Final message of issuance, sent from Issuer to Prover.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.ThirdIssuanceMessage.sigmaR">
+            <summary>
+            The sigma_r protocol value.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.ThirdIssuanceMessage.#ctor(UProveCrypto.Math.FieldZqElement[])">
+            <summary>
+            Create a third issuance message. Notation defined in the U-Prove spec.
+            </summary>
+        </member>
+        <member name="T:UProveCrypto.Math.BC.SubgroupGroupElementBCImpl">
+            <summary>
+            An element of a group using the subgroup construction.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.Math.BC.SubgroupGroupElementBCImpl.#ctor(Org.BouncyCastle.Math.BigInteger,Org.BouncyCastle.Math.BigInteger)">
+            <summary>
+            Constructs a new SubgroupGroupElement.
+            </summary>
+            <param name="i">The element value.</param>
+            <param name="p">The modulus.</param>
+        </member>
+        <member name="T:UProveCrypto.Math.BC.SubgroupGroupBCImpl">
+            <summary>
+            Represents a group Gq using the subgroup construction.
+            This implementation uses the Bouncy Castle library.
+            </summary>
+        </member>
+        <member name="F:UProveCrypto.Math.BC.SubgroupGroupBCImpl.pBytes">
+            <summary>
+            The value of p as a big-endian byte array.
+            </summary>
+        </member>
+        <member name="F:UProveCrypto.Math.BC.SubgroupGroupBCImpl.pValue">
+            <summary>
+            The value of p as a Bouncy Castle BigInteger.
+            </summary>
+        </member>
+        <member name="F:UProveCrypto.Math.BC.SubgroupGroupBCImpl.qBytes">
+            <summary>
+            The value of q as a big-endian byte array.
+            </summary>
+        </member>
+        <member name="F:UProveCrypto.Math.BC.SubgroupGroupBCImpl.qValue">
+            <summary>
+            The value of q as a Bouncy Castle BigInteger.
+            </summary>
+        </member>
+        <member name="F:UProveCrypto.Math.BC.SubgroupGroupBCImpl.gElement">
+            <summary>
+            The value of the generator g as a GroupElement.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.Math.BC.SubgroupGroupBCImpl.#ctor(System.Byte[],System.Byte[],System.Byte[],System.String,System.Byte[])">
+            <summary>
+            Constructs a SubgroupGroup.
+            </summary>
+            <param name="p">The value p.</param>
+            <param name="q">The value q.</param>
+            <param name="g">The value g.</param>
+            <param name="groupName">The known name of the group, or null.</param>
+            <param name="domainParameterSeed">The domain parameter seed if the NIST generation
+            is used, or null.</param>
+        </member>
+        <member name="P:UProveCrypto.Math.BC.SubgroupGroupBCImpl.P">
+            <summary>
+            Gets or sets the value p.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.Math.BC.SubgroupGroupBCImpl.Q">
+            <summary>
+            Gets or sets the value q.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.Math.BC.SubgroupGroupBCImpl.G">
+            <summary>
+            The subgroup generator G.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.Math.BC.SubgroupGroupBCImpl.ValidateGroupElement(UProveCrypto.GroupElement)">
+            <summary>
+            Verifies that e is an element of the group.
+            </summary>
+            <param name="e">The element to test.</param>
+            <exception cref="T:UProveCrypto.InvalidUProveArtifactException">
+            Thrown if i is not in the group.</exception>
+        </member>
+        <member name="M:UProveCrypto.Math.BC.SubgroupGroupBCImpl.CreateGroupElement(System.Byte[])">
+            <summary>
+            Returns the group element encoded in byte array.
+            </summary>
+            <param name="value">A byte array encoding a group element.</param>
+            <returns>A group element.</returns>
+        </member>
+        <member name="M:UProveCrypto.Math.BC.SubgroupGroupBCImpl.Verify">
+            <summary>
+            Verifies that the group is correctly constructed.
+            </summary>
+            <exception cref="T:UProveCrypto.InvalidUProveArtifactException">
+            Thrown if the group parameters are invalid.</exception>
+        </member>
+        <member name="P:UProveCrypto.Math.BC.SubgroupGroupBCImpl.Identity">
+            <summary>
+            Returns the identity element in the group.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.Math.BC.SubgroupGroupBCImpl.UpdateHash(UProveCrypto.HashFunction)">
+            <summary>
+            Updates the specified hash function with the group description elements.
+            </summary>
+            <param name="h">An instanciated hash function.</param>
+        </member>
+        <member name="M:UProveCrypto.Math.BC.SubgroupGroupBCImpl.DeriveElement(System.Byte[],System.Byte,System.Int32@)">
+            <summary>
+            This method implements the method defined in recommended parameters spec
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.Math.BC.SubgroupGroupBCImpl.MultiExponentiate(UProveCrypto.GroupElement[],UProveCrypto.Math.FieldZqElement[])">
+            <summary>
+            Bouncy castle implementation of multi-exponentiation.
+            </summary>
+            <param name="g">bases</param>
+            <param name="f">exponents</param>
+            <returns>
+            </returns>
+        </member>
+        <member name="M:UProveCrypto.Math.BC.SubgroupGroupBCImpl.Equals(System.Object)">
+            <summary>
+            Returns a value indiciating whether this instance is equal to the
+            specified object.
+            </summary>
+            <param name="o">An object to compare to this instance.</param>
+            <returns>True if this object equals the other object.</returns>
+        </member>
+        <member name="M:UProveCrypto.Math.BC.SubgroupGroupBCImpl.GetHashCode">
+            <summary>
+            Returns the hashcode for this instance.
+            </summary>
+            <returns>The hashcode for this instance.</returns>
+        </member>
+        <member name="T:UProveCrypto.ProtocolVersion">
+            <summary>
+            Version numbers for the U-Prove protocol.
+            </summary>
+        </member>
+        <member name="F:UProveCrypto.ProtocolVersion.V1_1">
+            Version 1.1</member>
+        <member name="T:UProveCrypto.IssuanceProtocolParameters">
+            <summary>
+            Contains parameters for an issuance protocol participant (Issuer or Prover).
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.IssuanceProtocolParameters.ProtocolVersion">
+            <summary>
+            The protocol version.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.IssuanceProtocolParameters.NumberOfTokens">
+            <summary>
+            The number of tokens to issue. Must be a positive number.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.IssuanceProtocolParameters.Attributes">
+            <summary>
+            The token attributes. Either this or the <code>Gamma</code> property
+            must be set. If both are set, then the <code>Gamma</code> value takes priority.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.IssuanceProtocolParameters.Gamma">
+            <summary>
+            The token gamma value encoding the attribute values. Either this or the
+            <code>Attributes</code> property must be set. If both are set, then the
+            <code>Gamma</code> value takes priority.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.IssuanceProtocolParameters.TokenInformation">
+            <summary>
+            The token information field value. Can be <code>null</code>.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.IssuanceProtocolParameters.DevicePublicKey">
+            <summary>
+            The device's public key. Can be <code>null</code>.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.IssuanceProtocolParameters.Validate">
+            <summary>
+            Validates the parameters object.
+            </summary>
+        </member>
+        <member name="T:UProveCrypto.PresentationProtocolParameters">
+            <summary>
+            Contains parameters for a presentation protocol participant (Prover or Verifier).
+            Abstract class to be extended by prover and verifier specific subclasses.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.PresentationProtocolParameters.IP">
+            <summary>
+            Gets or sets the Issuer parameters.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.PresentationProtocolParameters.Disclosed">
+            <summary>
+            Gets or sets the array of disclosed attribute indices.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.PresentationProtocolParameters.Committed">
+            <summary>
+            Gets or sets the array of committed attribute indices.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.PresentationProtocolParameters.PseudonymAttributeIndex">
+            <summary>
+            Gets or sets the index of the attribute used to derive a scope-exclusive pseudonym.
+            If a pseudonym is presented, both <code>PseudonymAttributeIndex</code> and
+            <code>PseudonymScope</code> must be set.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.PresentationProtocolParameters.PseudonymScope">
+            <summary>
+            Gets or sets the scope for the generation of a scope-exclusive pseudonym.
+            If a pseudonym is presented, both <code>PseudonymAttributeIndex</code> and
+            either <code>PseudonymScope</code> or <code>PseudonymScopeElement</code> must be set.
+            If the same scope will be reused multiple time, it is recommended to compute
+            and cache the scope element value using
+            <see cref="M:ProtocolHelper.GenerateScopeElement" />
+            and set it using <see cref="P:UProveCrypto.PresentationProtocolParameters.PseudonymScopeElement" />.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.PresentationProtocolParameters.PseudonymScopeElement">
+            <summary>
+            Gets or sets the scope element for the generation of a scope-exclusive pseudonym.
+            If a pseudonym is presented, both <code>PseudonymAttributeIndex</code> and
+            either <code>PseudonymScope</code> or <code>PseudonymScopeElement</code> must be set.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.PresentationProtocolParameters.Message">
+            <summary>
+            Gets or sets the presentation message.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.PresentationProtocolParameters.DeviceMessage">
+            <summary>
+            Gets or sets the Device message, if a Device-protected token is presented.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.PresentationProtocolParameters.Validate">
+            <summary>
+            Validates the parameters object.
+            </summary>
+        </member>
+        <member name="T:UProveCrypto.ProverPresentationProtocolParameters">
+            <summary>
+            Presentation protocol parameters for the Prover.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.ProverPresentationProtocolParameters.#ctor">
+            <summary>
+            Constructs a <code>ProverPresentationProtocolParameters</code> instance.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.ProverPresentationProtocolParameters.#ctor(UProveCrypto.IssuerParameters,System.Int32[],System.Byte[],UProveCrypto.UProveKeyAndToken,System.Byte[][])">
+            <summary>
+            Constructs a <code>ProverPresentationProtocolParameters</code> instance.
+            </summary>
+            <param name="ip">The issuer parameters.</param>
+            <param name="disclosed">Disclosed attribute indices.</param>
+            <param name="message">Presentation message.</param>
+            <param name="keyAndToken">Presented key and token.</param>
+            <param name="attributes">Token attributes.</param>
+        </member>
+        <member name="P:UProveCrypto.ProverPresentationProtocolParameters.DeviceContext">
+            <summary>
+            Gets or sets the Device context, if a Device-protected token is presented.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.ProverPresentationProtocolParameters.KeyAndToken">
+            <summary>
+            Gets or sets the presented U-Prove key and token.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.ProverPresentationProtocolParameters.Attributes">
+            <summary>
+            Gets or sets the token attributes.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.ProverPresentationProtocolParameters.RandomData">
+            <summary>
+            Gets or sets the pregenerated random data.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.ProverPresentationProtocolParameters.SetDeviceData(System.Byte[],UProveCrypto.IDevicePresentationContext)">
+            <summary>
+            Sets the device presentation data.
+            </summary>
+            <param name="deviceMessage">The Device message.</param>
+            <param name="deviceContext">The Device context.</param>
+        </member>
+        <member name="T:UProveCrypto.VerifierPresentationProtocolParameters">
+            <summary>
+            Presentation protocol parameters for the Verifier.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.VerifierPresentationProtocolParameters.#ctor">
+            <summary>
+            Constructs a <code>VerifierPresentationProtocolParameters</code> instance.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.VerifierPresentationProtocolParameters.#ctor(UProveCrypto.IssuerParameters,System.Int32[],System.Byte[],UProveCrypto.UProveToken)">
+            <summary>
+            Constructs a <code>VerifierPresentationProtocolParameters</code> instance.
+            </summary>
+            <param name="ip">The issuer parameters.</param>
+            <param name="disclosed">Disclosed attribute indices.</param>
+            <param name="message">Presentation message.</param>
+            <param name="token">Presented token.</param>
+        </member>
+        <member name="P:UProveCrypto.VerifierPresentationProtocolParameters.Token">
+            <summary>
+            Gets or sets the presented U-Prove token.
+            </summary>
+        </member>
+        <member name="T:UProveCrypto.GroupSerializable">
+            <summary>
+            This class is a serializable version of Group used only during serialization.
+            Serializing Group will result in the creation and serialization of this class instead.
+            This class is also created upon deserialization. The ToGroup() method will be called
+            by the surrogate class to create a new Group from this class.
+            </summary>
+        </member>
+        <member name="F:UProveCrypto.GroupSerializable.type">
+            <summary>
+            The type of the group.
+            </summary>
+        </member>
+        <member name="F:UProveCrypto.GroupSerializable.name">
+            <summary>
+            The name of the group.
+            </summary>
+        </member>
+        <member name="F:UProveCrypto.GroupSerializable.sgDesc">
+            <summary>
+            The subgroup group description.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.GroupSerializable.#ctor(UProveCrypto.Group)">
+            <summary>
+            Construct a GroupSerializable object from a Group object.
+            </summary>
+            <param name="group">The Group object being serialized.</param>
+        </member>
+        <member name="M:UProveCrypto.GroupSerializable.ToGroup">
+            <summary>
+            Deserialize this object into a Group object.
+            </summary>
+            <returns>The Group object represented by this GroupSerializable object.</returns>
+        </member>
+        <member name="T:UProveCrypto.SubgroupGroupSerializable">
+            <summary>
+            This class is a serializable version of SubgroupGroup used only during serialization.
+            Serializing SubgroupGroup will result in the creation and serialization of this class instead.
+            This class is also created upon deserialization. The ToSubgroupGroup() method will be called
+            by the surrogate class to create a new SubgroupGroup from this class.
+            </summary>
+        </member>
+        <member name="F:UProveCrypto.SubgroupGroupSerializable.p">
+            <summary>
+            The parameter p.
+            </summary>
+        </member>
+        <member name="F:UProveCrypto.SubgroupGroupSerializable.q">
+            <summary>
+            The parameter q.
+            </summary>
+        </member>
+        <member name="F:UProveCrypto.SubgroupGroupSerializable.g">
+            <summary>
+            The generator g.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.SubgroupGroupSerializable.#ctor(UProveCrypto.Math.SubgroupGroup)">
+            <summary>
+            Create a SubgrouGroupSerializable object from a SubgroupGroup.
+            </summary>
+            <param name="group">The group to serialize.</param>
+        </member>
+        <member name="M:UProveCrypto.SubgroupGroupSerializable.ToSubgroupGroup">
+            <summary>
+            Create a SubgroupGroup from this serialized form.
+            </summary>
+            <returns>A SubgroupGroup object.</returns>
+        </member>
+        <member name="T:UProveCrypto.IParametrizedDeserialization">
+            <summary>
+            Defines an object that requires an <code>IssuerParameters</code> instance to
+            complete the deserialization of an object.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.IParametrizedDeserialization.FinishDeserialization(UProveCrypto.IssuerParameters)">
+            <summary>
+            Completes the deserialization of the object.
+            </summary>
+            <param name="ip">The Issuer parameters used to parse the algebraic elements.</param>
+        </member>
+        <member name="T:UProveCrypto.Serializer">
+            <summary>
+            An object used for serializing various U-Prove types.
+            </summary>
+        </member>
+        <member name="T:UProveCrypto.UProveSerializationException">
+            <summary>
+            An exception caused in the process of serializing U-Prove types.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.UProveSerializationException.#ctor(System.String)">
+            <summary>
+            Construct a serialization exception.
+            </summary>
+            <param name="fieldName">The name of the field being serialized/deserialized.</param>
+        </member>
+        <member name="T:UProveCrypto.SubgroupParameterSets">
+            <summary>
+            Class for U-Prove subgroup parameters.  See ParameterSet for more documentation.
+            </summary>
+        </member>
+        <member name="F:UProveCrypto.SubgroupParameterSets.ParamSet_SG_1024160_V1Name">
+            <summary> Subgroup parameter set 1024/160 (80-bit security or less, not recommended.)</summary>
+        </member>
+        <member name="F:UProveCrypto.SubgroupParameterSets.ParamSet_SG_2048256_V1Name">
+            <summary> Recommended subgroup parameter set 2048/256 </summary>
+        </member>
+        <member name="F:UProveCrypto.SubgroupParameterSets.ParamSet_SG_3072256_V1Name">
+            <summary> Recommended subgroup parameter set 3072/256 </summary>
+        </member>
+        <member name="P:UProveCrypto.SubgroupParameterSets.ParamSetL1024N160V1">
+            <summary>Subgroup parameter set 1024/160</summary>
+        </member>
+        <member name="P:UProveCrypto.SubgroupParameterSets.ParamSetL2048N256V1">
+            <summary>Recommended subgroup parameter set 2048/256</summary>
+        </member>
+        <member name="P:UProveCrypto.SubgroupParameterSets.ParamSetL3072N256V1">
+            <summary>Recommended subgroup parameter set 3072/256</summary>
+        </member>
+        <member name="T:UProveCrypto.ParameterSet">
+            <summary>
+            Specifies a group and group generators to create a set of issuer parameters.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.ParameterSet.#ctor(System.String,UProveCrypto.Group,UProveCrypto.GroupElement[],UProveCrypto.GroupElement)">
+            <summary>
+            Constructs a new parameter set.
+            </summary>
+            <param name="name">The name of set.</param>
+            <param name="group">The group.</param>
+            <param name="g">An array of group generators.</param>
+            <param name="gd">The device generator.</param>
+        </member>
+        <member name="P:UProveCrypto.ParameterSet.Name">
+            <summary>
+            Gets or sets the set name.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.ParameterSet.Group">
+            <summary>
+            Gets or sets the set group.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.ParameterSet.G">
+            <summary>
+            Gets or sets the generators.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.ParameterSet.Gd">
+            <summary>
+            Gets or sets the set device generator.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.ParameterSet.ContainsParameterSet(System.String)">
+            <summary>
+            Returns <code>true</code> if the requested parameter set is found, <code>false</code> otherwise.
+            </summary>
+            <param name="oid">The OID of the parameters set.</param>
+            <returns>
+                <code>true</code> if the requested parameter set is found, <code>false</code> otherwise.</returns>
+        </member>
+        <member name="M:UProveCrypto.ParameterSet.TryGetNamedParameterSet(System.String,UProveCrypto.ParameterSet@)">
+            <summary>
+            Returns the identified parameter set if it exists. Valid <paramref name="oid" /> values are
+            <see cref="F:UProveCrypto.SubgroupParameterSets.ParamSet_SG_2048256_V1Name" />,
+            <see cref="F:UProveCrypto.SubgroupParameterSets.ParamSet_SG_3072256_V1Name" />,
+            <see cref="F:UProveCrypto.ECParameterSets.ParamSet_EC_P256_V1Name" />,
+            <see cref="F:UProveCrypto.ECParameterSets.ParamSet_EC_P384_V1Name" />, and
+            <see cref="F:UProveCrypto.ECParameterSets.ParamSet_EC_P521_V1Name" />.
+            </summary>
+            <param name="oid">The OID of the parameters set.</param>
+            <param name="set">The requested parameter set, if found.</param>
+            <returns>
+                <code>true</code> if the requested parameter set is found, <code>false</code> otherwise.</returns>
+        </member>
+        <member name="F:UProveCrypto.ParameterSet.NumberOfIssuerGenerators">
+            <summary>
+            The number of issuer generators included in the (pre-generated) parameter sets.
+            </summary>
+        </member>
+        <member name="T:UProveCrypto.Math.SubgroupGroup">
+            <summary>
+            Describes a group Gq using the subgroup construction.
+            </summary>
+        </member>
+        <member name="F:UProveCrypto.Math.SubgroupGroup.p">
+            <summary>
+            The value p in big-endian byte form.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.Math.SubgroupGroup.DomainParameterSeed">
+            <summary>
+            The domain parameter seed if verifiable generation is used.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.Math.SubgroupGroup.CreateSubgroupGroup(System.Byte[],System.Byte[],System.Byte[],System.String,System.Byte[])">
+            <summary>
+            Creates a SubgroupGroup.
+            </summary>
+            <param name="p">The value p.</param>
+            <param name="q">The value q.</param>
+            <param name="g">The value g.</param>
+            <param name="groupName">The known name of the group, or null.</param>
+            <param name="domainParameterSeed">The domain parameter seed if verifiable
+            generation is used, or null.</param>
+        </member>
+        <member name="M:UProveCrypto.Math.SubgroupGroup.#ctor(System.Byte[],System.String,System.Byte[])">
+            <summary>
+            Protected constructor for child types to call only.
+            </summary>
+            <param name="q">The value of q.</param>
+            <param name="groupName">The known name of the group, or null.</param>
+            <param name="domainParameterSeed">The domain parameter seed if verifiable
+            generation is used, or null.</param>
+        </member>
+        <member name="P:UProveCrypto.Math.SubgroupGroup.P">
+            <summary>
+            Gets the value p.
+            </summary>
+        </member>
+        <member name="F:UProveCrypto.Math.SubgroupGroup.SubgroupGroupSerializable">
+            <summary>
+            The serializable representation of this object.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.Math.SubgroupGroup.OnSerializing(System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            Custom serializer for this object.
+            </summary>
+            <param name="context">The streaming context.</param>
+        </member>
+        <member name="M:UProveCrypto.Math.SubgroupGroup.OnDeserialized(System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            Custom deserializer for this object.
+            </summary>
+            <param name="context">The streaming context.</param>
+        </member>
+        <member name="T:UProveCrypto.Math.SubgroupGroupElement">
+            <summary>
+            An element of a group using the subgroup construction.
+            </summary>
+        </member>
+        <member name="T:UProveCrypto.UProveToken">
+            <summary>
+            Represents a U-Prove token.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.UProveToken.#ctor">
+            <summary>
+            Constructs a U-Prove token.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.UProveToken.#ctor(System.Byte[],UProveCrypto.GroupElement,System.Byte[],System.Byte[],UProveCrypto.GroupElement,UProveCrypto.Math.FieldZqElement,UProveCrypto.Math.FieldZqElement,System.Boolean)">
+            <summary>
+            Represents a U-Prove token.
+            </summary>
+            <param name="uidp">The Issuer parameters UID.</param>
+            <param name="h">The public key value h.</param>
+            <param name="TI">The token information field value.</param>
+            <param name="PI">The Prover information field value.</param>
+            <param name="sigmaZPrime">The sigmaZPrime value.</param>
+            <param name="sigmaCPrime">The sigmaCPrime value.</param>
+            <param name="sigmaRPrime">The sigmaRPrime value.</param>
+            <param name="isDeviceProtected">True if the token is Device-protected, false otherwise.</param>
+        </member>
+        <member name="P:UProveCrypto.UProveToken.Uidp">
+            <summary>
+            Gets or sets the Issuer parameters UID.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.UProveToken.H">
+            <summary>
+            Gets or sets the public key value h.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.UProveToken.TI">
+            <summary>
+            Gets or sets the token information field value.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.UProveToken.PI">
+            <summary>
+            Gets or sets the Prover information field value.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.UProveToken.SigmaZPrime">
+            <summary>
+            Gets or sets the sigmaZPrime value.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.UProveToken.SigmaCPrime">
+            <summary>
+            Gets or sets the sigmaCPrime value.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.UProveToken.SigmaRPrime">
+            <summary>
+            Gets or sets the sigmaRPrime value.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.UProveToken.IsDeviceProtected">
+            <summary>
+            Gets or sets the boolean indicating if the token is Device-protected.
+            </summary>
+        </member>
+        <member name="T:UProveCrypto.VirtualDevice">
+            <summary>
+            Implements a simple <code>Device</code> for the U-Prove protocol with device binding.
+            This implementation can only have one active session (context).
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.VirtualDevice.#ctor(UProveCrypto.IssuerParameters)">
+            <summary>
+            Constructs a new VirtualDevice instance.
+            </summary>
+            <param name="ip">The Issuer parameters.</param>
+        </member>
+        <member name="M:UProveCrypto.VirtualDevice.#ctor(UProveCrypto.IssuerParameters,UProveCrypto.Math.FieldZqElement)">
+            <summary>
+            Constructs a new VirtualDevice instance.
+            </summary>
+            <param name="ip">The Issuer parameters.</param>
+            <param name="xd">The device private key.</param>
+        </member>
+        <member name="M:UProveCrypto.VirtualDevice.#ctor(UProveCrypto.IssuerParameters,UProveCrypto.Math.FieldZqElement,UProveCrypto.Math.FieldZqElement)">
+            <summary>
+            Constructs a new VirtualDevice instance.
+            </summary>
+            <param name="ip">The Issuer parameters.</param>
+            <param name="xd">The device private key.</param>
+            <param name="preGenWdPrime">The pregenerated w_d prime value (for one presentation)</param>
+        </member>
+        <member name="M:UProveCrypto.VirtualDevice.#ctor(UProveCrypto.ParameterSet)">
+            <summary>
+            Constructs a new VirtualDevice instance.
+            </summary>
+            <param name="parameterSet">The parameter set.</param>
+        </member>
+        <member name="M:UProveCrypto.VirtualDevice.#ctor(UProveCrypto.ParameterSet,UProveCrypto.Math.FieldZqElement)">
+            <summary>
+            Constructs a new VirtualDevice instance.
+            </summary>
+            <param name="parameterSet">The parameter set.</param>
+            <param name="xd">The device private key.</param>
+        </member>
+        <member name="M:UProveCrypto.VirtualDevice.#ctor(UProveCrypto.ParameterSet,UProveCrypto.Math.FieldZqElement,UProveCrypto.Math.FieldZqElement)">
+            <summary>
+            Constructs a new VirtualDevice instance.
+            </summary>
+            <param name="parameterSet">The parameter set.</param>
+            <param name="xd">The device private key.</param>
+            <param name="preGenWdPrime">The pregenerated w_d prime value (for one presentation)</param>
+        </member>
+        <member name="M:UProveCrypto.VirtualDevice.#ctor(UProveCrypto.Group,UProveCrypto.GroupElement,UProveCrypto.Math.FieldZq,UProveCrypto.Math.FieldZqElement,UProveCrypto.Math.FieldZqElement)">
+            <summary>
+            Private constructor - takes and sets all fields.
+            </summary>
+            <param name="Gq">The group</param>
+            <param name="gd">The device generator</param>
+            <param name="Zq">The Field associated to the group <c>Gq</c></param>
+            <param name="xd">The xd.</param>
+            <param name="preGenWdPrime">The pre gen wd prime.</param>
+        </member>
+        <member name="M:UProveCrypto.VirtualDevice.UProveCrypto#IDevice#GetDevicePublicKey">
+            <summary>
+            Returns the Device public key <code>h_d</code>.
+            </summary>
+            <returns>
+                <code>h_d</code>.
+            </returns>
+        </member>
+        <member name="M:UProveCrypto.VirtualDevice.UProveCrypto#IDevice#GetPresentationContext">
+            <summary>
+            Gets the presentation context.
+            </summary>
+            <returns>
+            A presentation context.
+            </returns>
+        </member>
+        <member name="M:UProveCrypto.VirtualDevice.Dispose">
+            <summary>
+            Dispose this VirtualDevice
+            </summary>
+        </member>
+        <member name="T:UProveCrypto.VirtualDevice.DevicePresentationContext">
+            <summary>
+            A device presentation context
+            </summary>
+        </member>
+        <member name="F:UProveCrypto.VirtualDevice.DevicePresentationContext.device">
+            <summary>
+            The device
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.VirtualDevice.DevicePresentationContext.#ctor(UProveCrypto.VirtualDevice)">
+            <summary>
+            Initializes a new instance of the <see cref="T:UProveCrypto.VirtualDevice.DevicePresentationContext" /> class.
+            </summary>
+            <param name="device">The device.</param>
+        </member>
+        <member name="T:UProveCrypto.DeviceException">
+            <summary>
+            Exception thrown by a device implementation
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.DeviceException.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:UProveCrypto.DeviceException" /> class.
+            </summary>
+            <param name="message">The message.</param>
+        </member>
+        <member name="T:UProveCrypto.Math.FieldZq">
+            <summary>
+            Represents the prime field Zq.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.Math.FieldZq.Zero">
+            <summary>
+            The field element zero.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.Math.FieldZq.One">
+            <summary>
+            The field element one.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.Math.FieldZq.NegativeOne">
+            <summary>
+            The field element negative one.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.Math.FieldZq.GetElement(System.Int32)">
+            <summary>
+            Construct a FieldZqElement with the value given.
+            </summary>
+            <param name="value">An integer whose absolute value is less than the modulus.</param>
+            <returns>A new FieldZqElement from this field with the given value.</returns>
+        </member>
+        <member name="M:UProveCrypto.Math.FieldZq.GetElement(System.UInt32)">
+            <summary>
+            Construct a FieldZqElement with the value given.
+            </summary>
+            <param name="value">A non-negative integer less than the modulus.</param>
+            <returns>A new FieldZqElement from this field with the given value.</returns>
+            <remarks>To create the value <code>-x mod q</code>, use <code>GetElement(x).Negate()</code>.</remarks>
+        </member>
+        <member name="M:UProveCrypto.Math.FieldZq.GetElement(System.Byte[])">
+            <summary>
+            Construct a FieldZqElement with the value given.
+            </summary>
+            <param name="value">A byte array representing the non-negative value in big endian order.</param>
+            <returns>A new FieldZqElement from this field with the given value.</returns>
+            <remarks>To create the value <code>-x mod q</code>, use <code>GetElement(x).Negate()</code>.</remarks>
+        </member>
+        <member name="M:UProveCrypto.Math.FieldZq.GetElements(System.Byte[][])">
+            <summary>
+            Construct a FieldZqElement array with the values given.
+            </summary>
+            <param name="values">An array of arrays of bytes representing the non-negative values in big endian order.</param>
+            <returns>A new FieldZqElement from this field with the given value.</returns>
+        </member>
+        <member name="M:UProveCrypto.Math.FieldZq.GetRandomElement(System.Boolean,System.Int32)">
+            <summary>
+            Generates a random Zq element.
+            </summary>
+            <param name="nonZero">True to return a non-zero element.</param>
+            <param name="maxBitLength">Maximum length of the random element, or -1 for full size elements.</param>
+            <returns>A random Zq element.</returns>
+        </member>
+        <member name="M:UProveCrypto.Math.FieldZq.GetRandomElements(System.Int32,System.Boolean,System.Int32)">
+            <summary>
+            Generates an array of random Zq elements.
+            </summary>
+            <param name="n">The number of elements to return.</param>
+            <param name="nonZero">True to return non-zero elements.</param>
+            <param name="maxBitLength">Maximum length of the random elements, or -1 for full size elements.</param>
+            <returns>Random Zq elements.</returns>
+        </member>
+        <member name="M:UProveCrypto.Math.FieldZq.GetElementFromDigest(System.Byte[])">
+            <summary>
+            Transforms a hash digest into a Zq element. The digest is interpreted as an unsigned
+            integer in big-endian byte order modulo q.
+            </summary>
+            <param name="digest">A digest value.</param>.
+            <returns>A Zq element.</returns></member>
+        <member name="M:UProveCrypto.Math.FieldZq.IsElement(UProveCrypto.Math.FieldZqElement)">
+            <summary>
+            Returns true if the given element is an element from this field.
+            </summary>
+            <param name="element">The element to check.</param>
+            <returns>True if the given element is an element from this field.</returns>
+        </member>
+        <member name="M:UProveCrypto.Math.FieldZq.CreateFieldZq(System.Byte[])">
+            <summary>
+            Instantiates a new FieldZq object.
+            </summary>
+            <param name="modulus">The modulus q.</param>
+            <returns>A FieldZqObject.</returns>
+        </member>
+        <member name="T:UProveCrypto.Group">
+            <summary>
+            Describes a group of order q, denoted Gq.  MUST NOT be modified after construction.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.Group.Type">
+            <summary>
+            The type of group.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.Group.Q">
+            <summary>
+            The parameter Q as a big-endian byte array.
+            It describes the order of the group.  MUST NOT be modified after construction.
+            </summary>
+        </member>
+        <member name="F:UProveCrypto.Group._fieldZq">
+            <summary>
+            Last computed value of FieldZq
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.Group.FieldZq">
+            <summary>
+            Returns the field associated with this group.  The field
+            is computed once using the modulus Q.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.Group.G">
+            <summary>
+            The generator element.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.Group.GroupName">
+            <summary>
+            The name of the group.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.Group.#ctor(UProveCrypto.GroupType,System.Byte[],System.String)">
+            <summary>
+            Constructs a Group.
+            <param name="type">The group construction.</param><param name="q">The value q.</param><param name="groupName">The group name.</param></summary>
+        </member>
+        <member name="M:UProveCrypto.Group.ValidateGroupElement(UProveCrypto.GroupElement)">
+            <summary>
+            Verifies that e is a group element.
+            </summary>
+            <param name="e">The element to test.</param>
+            <exception cref="T:UProveCrypto.InvalidUProveArtifactException">
+            Thrown if e is not in the group.</exception>
+        </member>
+        <member name="M:UProveCrypto.Group.CreateGroupElement(System.Byte[])">
+            <summary>
+            Returns the group element encoded in byte array.
+            </summary>
+            <param name="value">A byte array encoding a group element.</param>
+            <returns>A group element.</returns>
+        </member>
+        <member name="M:UProveCrypto.Group.GetRandomElement(System.Boolean,System.Int32)">
+            <summary>
+            Generates a random group element. Generates a random exponent r and computes G^r.
+            </summary>
+            <param name="nonIdentity">True to return a non-identity element.</param>
+            <param name="maxBitLength">Maximum length of the exponent used to get random element. For example, to choose a random
+            group elements from the set {G^0, G^1, G^2, G^3}, set maxBitLength to 2. Set maxBitLength to -1 to choose random group elements
+            from the entire group.</param>
+            <returns>A random group element.</returns>
+        </member>
+        <member name="M:UProveCrypto.Group.GetRandomElements(System.Int32,System.Boolean,System.Int32)">
+            <summary>
+            Generates an array of random group elements.  Calls GetRandomElement n times.
+            </summary>
+            <param name="n">The number of elements to return.</param>
+            <param name="nonIdentity">True to return non-identity elements.</param>
+            <param name="maxBitLength">Maximum length of the exponent used to get random element. For example, to choose a random
+            group elements from the set {G^0, G^1, G^2, G^3}, set maxBitLength to 2. Set maxBitLength to -1 to choose random group elements
+            from the entire group.</param>
+            <returns>Random group elements.</returns>
+        </member>
+        <member name="M:UProveCrypto.Group.UpdateHash(UProveCrypto.HashFunction)">
+            <summary>
+            Updates the specified hash function with the group description elements.
+            </summary>
+            <param name="h">An hash function object.</param>
+        </member>
+        <member name="M:UProveCrypto.Group.Verify">
+            <summary>
+            Verifies that the group is correctly constructed.
+            </summary>
+            <exception cref="T:UProveCrypto.InvalidUProveArtifactException">
+            Thrown if the group parameters are invalid.</exception>
+        </member>
+        <member name="P:UProveCrypto.Group.Identity">
+            <summary>
+            Returns the identity element in the group.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.Group.DeriveElement(System.Byte[],System.Byte,System.Int32@)">
+            <summary>
+            Derives an unpredictable element of the group, using the input. Each
+            construction defines its own derivation mechanism, but each takes an
+            optional context string and an index, and returns a counter. Calling
+            this method with the same parameter values returns the same element
+            and counter, calling it with a different context or index value must
+            return a different element.
+            </summary>
+            <param name="context">An optional context used by the derivation
+            mechanism, can be null.</param>
+            <param name="index">An 8-bit integer index value.</param>
+            <param name="counter">A counter value indicating the state at which the
+            derivation mechanism stopped.</param>
+            <returns>A random group element.</returns>
+        </member>
+        <member name="M:UProveCrypto.Group.MultiExponentiate(UProveCrypto.GroupElement[],UProveCrypto.Math.FieldZqElement[])">
+            <summary>
+            Compute a product of powers.
+            Return the product of the <code>bases[i].Exponentiate(exponents[i])</code> for <c>i</c> from <c>0</c> to <c>bases.Length -1</c>.
+            The inputs <c>bases</c> and <c>exponents</c> must have the same length
+            </summary>
+            <param name="bases">Group elements array.</param>
+            <param name="exponents">Field elements array.</param>
+            <returns>Multi-exponentiation of the group elements to the field elements.</returns>
+        </member>
+        <member name="M:UProveCrypto.Group.MultiExponentiate(UProveCrypto.GroupElement,UProveCrypto.GroupElement,UProveCrypto.Math.FieldZqElement,UProveCrypto.Math.FieldZqElement)">
+            <summary>
+            Convenience method to compute P = (base1^exponent1)*(base2^exponent2). Calls the MultiExponentiate routine
+            </summary>
+            <param name="base1">The first base in the product</param>
+            <param name="base2">The second base in the product</param>
+            <param name="exponent1">The first exponent in the product</param>
+            <param name="exponent2">The second exponent in the prodcut</param>
+            <returns>The product of powers base1^exponent1 and base2^exponent2.</returns>
+        </member>
+        <member name="M:UProveCrypto.Group.Invert(UProveCrypto.GroupElement)">
+            <summary>
+            Returns g^{-1}.
+            </summary>
+            <param name="g">Group element to invert.</param>
+            <returns>
+            </returns>
+        </member>
+        <member name="M:UProveCrypto.Group.Divide(UProveCrypto.GroupElement,UProveCrypto.GroupElement)">
+            <summary>
+            Returns numerator/denominator.
+            </summary>
+            <param name="numerator">Numerator</param>
+            <param name="denominator">Denominator</param>
+            <returns>
+            </returns>
+        </member>
+        <member name="M:UProveCrypto.Group.Divide(UProveCrypto.GroupElement[],UProveCrypto.GroupElement[])">
+            <summary>
+            Returns the product of all the numerators divided by the product of all the denominators.
+            </summary>
+            <param name="numerators">Array of group elements to multiply together to form the numerator.</param>
+            <param name="denominators">Array of group elements to multiply together to form the denominator.</param>
+            <returns>Quotient.</returns>
+        </member>
+        <member name="M:UProveCrypto.Group.MathImplName">
+            <summary>
+            Returns a string describing the underlying math implementation being used.
+            This returns the name of the math implementation used to compile UProveCrypto.
+            </summary>
+        </member>
+        <member name="T:UProveCrypto.HashFunction">
+            <summary>
+            A hash function for the U-Prove protocols.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.HashFunction.#ctor(System.String)">
+            <summary>
+            Constructs a HashFunction.
+            </summary>
+            <param name="hashAlgorithm">The name of the hash algorithm. Must be one of the value listed in http://msdn.microsoft.com/en-us/library/wet69s13.aspx</param>
+        </member>
+        <member name="M:UProveCrypto.HashFunction.Hash(System.Byte)">
+            <summary>
+            Hash a byte.
+            </summary>
+            <param name="value">A byte to be hashed.</param>
+        </member>
+        <member name="M:UProveCrypto.HashFunction.Hash(System.Int32)">
+            <summary>
+            Hash an integer.
+            </summary>
+            <param name="value">An integer to be hashed.</param>
+        </member>
+        <member name="M:UProveCrypto.HashFunction.Hash(UProveCrypto.Group)">
+            <summary>
+            Hash a Group.
+            </summary>
+            <param name="value">A group to be hashed.</param>
+        </member>
+        <member name="M:UProveCrypto.HashFunction.Hash(UProveCrypto.Math.FieldZqElement)">
+            <summary>
+            Hash a FieldZqElement.
+            </summary>
+            <param name="value">A field Zq element to be hashed.</param>
+        </member>
+        <member name="M:UProveCrypto.HashFunction.Hash(UProveCrypto.GroupElement)">
+            <summary>
+            Hash a GroupElement.
+            </summary>
+            <param name="value">A GroupElement to be hashed.</param>
+        </member>
+        <member name="M:UProveCrypto.HashFunction.Hash(System.Byte[])">
+            <summary>
+            Hash a byte array.
+            </summary>
+            <param name="value">An array of bytes to be hashed.</param>
+        </member>
+        <member name="M:UProveCrypto.HashFunction.Hash(UProveCrypto.GroupElement[])">
+            <summary>
+            Hash a GroupElement array.
+            </summary>
+            <param name="values">An array of GroupElements to be hashed.</param>
+        </member>
+        <member name="M:UProveCrypto.HashFunction.Hash(UProveCrypto.Math.FieldZqElement[])">
+            <summary>
+            Hash a FieldZqElement array.
+            </summary>
+            <param name="values">An array of FieldZqElements to be hashed.</param>
+        </member>
+        <member name="M:UProveCrypto.HashFunction.Hash(System.Byte[][])">
+            <summary>
+            Hash a series of byte arrays.
+            </summary>
+            <param name="values">An array of arrays of bytes to be hashed.</param>
+        </member>
+        <member name="M:UProveCrypto.HashFunction.Hash(System.Int32[])">
+            <summary>
+            Hash a series of int arrays.
+            </summary>
+            <param name="values">An array of integers to be hashed.</param>
+        </member>
+        <member name="M:UProveCrypto.HashFunction.HashNull">
+            <summary>
+            Hash the null value.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.HashFunction.HashWithoutFormatting(System.Byte[])">
+            <summary>
+            Hash a byte array without formatting.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.HashFunction.Digest">
+            <summary>
+            Finalizes the hash function and returns the digest.
+            </summary>
+        </member>
+        <member name="T:UProveCrypto.InvalidUProveArtifactException">
+            <summary>
+            This exception is thrown when a U-Prove artifact (an IssuerParameters, a UProveToken, or a PresentationProof)
+            is invalid.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.InvalidUProveArtifactException.#ctor">
+            <summary>
+            Constructs a new InvalidUProveArtifactException.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.InvalidUProveArtifactException.#ctor(System.String)">
+            <summary>
+            Constructs a new InvalidUProveArtifactException.
+            </summary>
+            <param name="message">The exception message.</param>
+        </member>
+        <member name="T:UProveCrypto.IDevice">
+            <summary>
+            Simple Device Interface
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.IDevice.GetDevicePublicKey">
+            <summary>
+            Returns the Device public key <code>h_d</code>.
+            </summary>
+            <returns>
+                <code>h_d</code>.</returns>
+        </member>
+        <member name="M:UProveCrypto.IDevice.GetPresentationContext">
+            <summary>
+            Gets the presentation context.
+            </summary>
+            <returns>A presentation context.</returns>
+        </member>
+        <member name="T:UProveCrypto.IDevicePresentationContext">
+            <summary>
+            Interface for a device presentation context
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.IDevicePresentationContext.GetInitialWitness">
+            <summary>
+            Returns the Device initial witness for a U-Prove token presentation.
+            </summary>
+            <returns>
+                <code>a</code>.</returns>
+        </member>
+        <member name="M:UProveCrypto.IDevicePresentationContext.GetInitialWitnessesAndPseudonym(UProveCrypto.GroupElement,UProveCrypto.GroupElement@,UProveCrypto.GroupElement@)">
+            <summary>
+            Returns the Device initial witness for a U-Prove token presentation.
+            </summary>
+            <param name="gs">A group element derived from the pseudonym scope</param>
+            <param name="apPrime">The <code>ap'</code> value.</param>
+            <param name="Ps">The <code>Ps</code> value.</param>
+            <returns>
+                <code>a</code>.</returns>
+        </member>
+        <member name="M:UProveCrypto.IDevicePresentationContext.GetDeviceResponse(System.Byte[],System.Byte[],System.String)">
+            <summary>
+            Returns the Device response for a U-Prove token presentation.
+            </summary>
+            <param name="messageForDevice">The message for the Device.</param>
+            <param name="partialChallengeDigest">The partial challenge digest.</param>
+            <param name="hashOID">The hash algorithm OID for the challenge generation.</param>
+            <returns>
+                <code>r_d</code>.</returns>
+        </member>
+        <member name="T:UProveCrypto.IssuerProtocolParameters">
+            <summary>
+            Issuance protocol parameters for the Issuer.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.IssuerProtocolParameters.#ctor(UProveCrypto.IssuerKeyAndParameters)">
+            <summary>
+            Constructs new issuance protocol parameters for the Issuer.
+            </summary>
+            <param name="ikap">The Issuer key and parameters.</param>
+        </member>
+        <member name="P:UProveCrypto.IssuerProtocolParameters.IssuerKeyAndParameters">
+            <summary>
+            The Issuer key and parameters.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.IssuerProtocolParameters.PreGeneratedW">
+            <summary>
+            The pregenerated issuer randomizers. Can be <code>null</code>.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.IssuerProtocolParameters.Validate">
+            <summary>
+            Validates the issuance parameters.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.IssuerProtocolParameters.CreateIssuer">
+            <summary>
+            Creates an Issuer instance.
+            </summary>
+            <returns>An Issuer instance.</returns>
+        </member>
+        <member name="T:UProveCrypto.PostFirstMessageState">
+            <summary>
+            Issuance state after the first message generation. This
+            object can be used to re-instanciate an <code>Issuer</code> instance
+            that can complete the token issuance.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.PostFirstMessageState.W">
+            <summary>
+            The issuance randomizers.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.PostFirstMessageState.#ctor(UProveCrypto.Math.FieldZqElement[])">
+            <summary>
+            Constructs a <code>PostFirstMessageState</code> instance.
+            </summary>
+            <param name="w">The issuance randomizers.</param>
+        </member>
+        <member name="T:UProveCrypto.Issuer">
+            <summary>
+            Implements the <code>Issuer</code> side of the U-Prove issuance protocol. One instance must be created for
+            each run of the issuance protocol, in which many U-Prove tokens can be obtained in parallel.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.Issuer.#ctor(UProveCrypto.IssuerKeyAndParameters,System.Int32,System.Byte[][],System.Byte[],UProveCrypto.GroupElement)">
+            <summary>
+            Constructs a new <code>Issuer</code> instance.
+            </summary>
+            <param name="ikap">The Issuer key and parameters.</param>
+            <param name="numberOfTokens">Number of tokens to issue.</param>
+            <param name="A">The token attribute values.</param>
+            <param name="TI">The token information field value.</param>
+            <param name="hd">The Device public key. If this parameter is non-null, then the issued tokens will be Device-protected.</param>
+        </member>
+        <member name="M:UProveCrypto.Issuer.#ctor(UProveCrypto.IssuerKeyAndParameters,System.Int32,System.Byte[][],System.Byte[],UProveCrypto.GroupElement,UProveCrypto.Math.FieldZqElement[])">
+            <summary>
+            Constructs a new <code>Issuer</code> instance.
+            </summary>
+            <param name="ikap">The Issuer key and parameters.</param>
+            <param name="numberOfTokens">Number of tokens to issue.</param>
+            <param name="A">The token attribute values.</param>
+            <param name="TI">The token information field value.</param>
+            <param name="hd">The Device public key. If this parameter is non-null, then the issued tokens will be Device-protected.</param>
+            <param name="preGeneratedW">Optional pregenerated <code>numberOfTokens</code> random Zq elements.</param>
+        </member>
+        <member name="M:UProveCrypto.Issuer.#ctor(UProveCrypto.IssuerKeyAndParameters,UProveCrypto.PostFirstMessageState)">
+            <summary>
+            Constructs a new <code>Issuer</code> instance ready to complete the issuance.
+            </summary>
+            <param name="ikap">The issuer key and parameters.</param>
+            <param name="pfms">State of another <code>Issuer</code> instance after the first message was generated.</param>
+        </member>
+        <member name="M:UProveCrypto.Issuer.#ctor(UProveCrypto.IssuerKeyAndParameters,System.Int32,UProveCrypto.GroupElement,UProveCrypto.Math.FieldZqElement[])">
+            <summary>
+            Constructs a new <code>Issuer</code> instance.
+            </summary>
+            <param name="ikap">The Issuer key and parameters.</param>
+            <param name="numberOfTokens">Number of tokens to issue.</param>
+            <param name="gamma">The gamma value encoding the token attributes.</param>
+            <param name="preGeneratedW">Optional pregenerated <code>numberOfTokens</code> random Zq elements.</param>
+        </member>
+        <member name="M:UProveCrypto.Issuer.GenerateFirstMessage">
+            <summary>
+            Generates the first issuance message.
+            </summary>
+            <returns>The first issuance message.</returns>
+        </member>
+        <member name="M:UProveCrypto.Issuer.ExportPostFirstMessageState">
+            <summary>
+            Get the issuance state after the first message generation.
+            </summary>
+            <returns>The issuance state after the first message generation.</returns>
+        </member>
+        <member name="M:UProveCrypto.Issuer.GenerateThirdMessage(UProveCrypto.SecondIssuanceMessage)">
+            <summary>
+            Generates the third issuance message.
+            </summary>
+            <param name="message">The second issuance message.</param>
+            <returnn>The third issuance message.</returnn>
+        </member>
+        <member name="T:UProveCrypto.IssuerKeyAndParameters">
+            <summary>
+            Contains an Issuer parameters and the associated private key.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.IssuerKeyAndParameters.#ctor(UProveCrypto.Math.FieldZqElement,UProveCrypto.IssuerParameters)">
+            <summary>
+            Constructs an IssuerKeyAndParameters instance.
+            </summary>
+            <param name="privateKey">The private key.</param>
+            <param name="issuerParameters">The Issuer parameters.</param>
+        </member>
+        <member name="M:UProveCrypto.IssuerKeyAndParameters.#ctor(System.String,System.String)">
+            <summary>
+            Constructs an IssuerKeyAndParameters instance from serialized strings.
+            </summary>
+            <param name="serializedPrivateKey">The serialized private key.</param>
+            <param name="serializedIssuerParameters">The serialized Issuer parameters.</param>
+        </member>
+        <member name="P:UProveCrypto.IssuerKeyAndParameters.PrivateKey">
+            <summary>
+            The private key.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.IssuerKeyAndParameters.IssuerParameters">
+            <summary>
+            The Issuer parameters.
+            </summary>
+        </member>
+        <member name="T:UProveCrypto.IssuerParameters">
+            <summary>
+            Represents the Issuer Parameters, including the Device parameters if issuance of Device-protected
+            tokens is supported.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.IssuerParameters.#ctor">
+            <summary>
+            Constructs an Issuer parameters instance.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.IssuerParameters.#ctor(System.String)">
+            <summary>
+            Constructs an Issuer parameters instance from a serialized string
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.IssuerParameters.#ctor(System.Byte[],UProveCrypto.Group,System.String,UProveCrypto.GroupElement[],UProveCrypto.GroupElement,System.Byte[],System.Byte[],System.Boolean)">
+            <summary>
+            Constructs an Issuer parameters instance.
+            </summary>
+            <param name="uidp">The Issuer parameters UID.</param>
+            <param name="group">The group description.</param>
+            <param name="uidh">The hash algorithm identifier.</param>
+            <param name="g">The generator values.</param>
+            <param name="gd">The Device generator, or null.</param>
+            <param name="e">The encoding bytes.</param>
+            <param name="s">The specification bytes.</param>
+            <param name="usesRecommendedParameters">Indicates if the group and g array uses the recommended parameters.</param>
+        </member>
+        <member name="P:UProveCrypto.IssuerParameters.UidP">
+            <summary>
+            Gets or sets the Issuer parameters UID.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.IssuerParameters.Gq">
+            <summary>
+            Gets or sets the group description.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.IssuerParameters.UidH">
+            <summary>
+            Gets or sets the hash algorithm identifier.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.IssuerParameters.G">
+            <summary>
+            Gets or sets the generator values.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.IssuerParameters.Gd">
+            <summary>
+            Gets or sets the Device generator value.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.IssuerParameters.E">
+            <summary>
+            Gets or sets the encoding bytes.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.IssuerParameters.S">
+            <summary>
+            Gets or sets the specification bytes.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.IssuerParameters.UsesRecommendedParameters">
+            <summary>
+            Gets or sets the indicator for usage of the recommended parameters.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.IssuerParameters.IsDeviceSupported">
+            <summary>
+            Returns true if Device-protection is supported.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.IssuerParameters.Verify">
+            <summary>
+            Verifies the Issuer parameters.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.IssuerParameters.HashFunction">
+            <summary>
+            Gets a newly instanciated hash function with the algorithm specified in Uidh.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.IssuerParameters.Digest(System.Boolean)">
+            <summary>
+            Gets the Issuer parameter digest.
+            <param name="deviceProtected">True if the digest is for a device-protected token, false otherwise.</param></summary>
+        </member>
+        <member name="P:UProveCrypto.IssuerParameters.Zq">
+            <summary>
+            The FieldZq object associated with this IssuerParameters object.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.IssuerParameters.HashFunctionOID">
+            <summary>
+            Gets the algorithm OID for the active hash function. OIDs are taken from http://msdn.microsoft.com/en-us/library/aa381133(VS.85).aspx.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.IssuerParameters.Serialize``1(``0)">
+            <summary>
+            Serialize a UProveCrypto type to a JSON string
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.IssuerParameters.Serialize">
+            <summary>
+            Serialize this IssuerParameters to a JSON string
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.IssuerParameters.Deserialize``1(System.String)">
+            <summary>
+            Deserialize a JSON string into a UProveCrypto object
+            </summary>
+        </member>
+        <member name="T:UProveCrypto.IssuerSetupParameters">
+            <summary>
+            Specifies the setup parameters that will be used to generate the issuer parameters. At a
+            minimum, the <see cref="P:UProveCrypto.IssuerSetupParameters.UidP" /> and either the <see cref="P:UProveCrypto.IssuerSetupParameters.E" /> or
+            <see cref="P:UProveCrypto.IssuerSetupParameters.NumberOfAttributes" /> attributes must be set. Default
+            values are described in the documentation of each attribute.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.IssuerSetupParameters.RecommendedParametersMaxNumberOfAttributes">
+            <summary>
+            Returns the max number of attributes when using the recommended parameters.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.IssuerSetupParameters.#ctor">
+            <summary>
+            Constructs a new <code>IssuerSetupParameters</code> instance.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.IssuerSetupParameters.GroupConstruction">
+            <summary>
+            Gets or sets the group construction. Defaults to <see cref="F:UProveCrypto.GroupType.ECC" />.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.IssuerSetupParameters.ParameterSet">
+            <summary>
+            Gets or sets the parameter set. Defaults to the value returned by <see cref="M:GetDefaultParameterSet" />.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.IssuerSetupParameters.UseRecommendedParameterSet">
+            <summary>
+            Gets or sets if recommended parameters are used. Defaults to <code>true</code>.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.IssuerSetupParameters.Gq">
+            <summary>
+            Gets or sets the group description. This attribute should only be used if a non-recommended
+            group is used. There is no default value.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.IssuerSetupParameters.E">
+            <summary>
+            Gets or sets the E array. This attribute is automatically set when
+            setting the <see cref="P:UProveCrypto.IssuerSetupParameters.NumberOfAttributes" /> attribute using the
+            default encoding values.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.IssuerSetupParameters.NumberOfAttributes">
+            <summary>
+            Gets or sets the number of attributes to be encoded in the token.
+            Setting this property will also set the corresponding <see cref="P:UProveCrypto.IssuerSetupParameters.E" />
+            attribute using <see cref="M:GetDefaultEValues" />.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.IssuerSetupParameters.UidH">
+            <summary>
+            Gets or sets the hash algorithm unique identifier. Defaults to <code>SHA-256</code>.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.IssuerSetupParameters.UidP">
+            <summary>
+            Gets of sets the Issuer parameters unique identifier. This value must be set, there is
+            no default.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.IssuerSetupParameters.S">
+            <summary>
+            Gets or sets the specification value. Defaults to <code>null</code>.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.IssuerSetupParameters.Validate">
+            <summary>
+            Validates the consistency of the object. This method is called by the <see cref="M:UProveCrypto.IssuerSetupParameters.Generate(System.Boolean)" /> method.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.IssuerSetupParameters.Generate(System.Boolean)">
+            <summary>
+            Generates a fresh Issuer key and parameters.
+            </summary>
+            <param name="supportDevice">If true, the parameters will support issuing Device-protected tokens. Defaults to <code>false</code>.</param>
+            <returns>A Issuer key and parameters instance.</returns>
+        </member>
+        <member name="M:UProveCrypto.IssuerSetupParameters.GetDefaultParameterSet(UProveCrypto.GroupType)">
+            <summary>
+            Returns the default parameter set for a specified construction. For <see cref="F:UProveCrypto.GroupType.Subgroup" />,
+            the default is <see cref="P:UProveCrypto.SubgroupParameterSets.ParamSetL2048N256V1" />; for <see cref="F:UProveCrypto.GroupType.ECC" />,
+            the default is <see cref="P:UProveCrypto.ECParameterSets.ParamSet_EC_P256_V1" />.
+            </summary>
+            <param name="construction">Group construction to use. Defaults to <see cref="F:UProveCrypto.GroupType.ECC" />.</param>
+            <returns>The default parameter set.</returns>
+        </member>
+        <member name="M:UProveCrypto.IssuerSetupParameters.GetDefaultEValues(System.Int32)">
+            <summary>
+            Get the default <code>E</code> values for a specified number of attributes. This returns an
+            array initized with <code>0x01</code>, to allow arbitrary-size attributes.
+            </summary>
+            <param name="numberOfAttributes">Number of attributes to encode in U-Prove tokens.</param>
+            <returns>A byte-array initialized with 0x01 bytes.</returns>
+        </member>
+        <member name="T:UProveCrypto.ProofGenerationRandomData">
+            <summary>
+            Specifies the random data for the presentation proof generation, if provided externally.
+            Typically this data is generated at presentation time, and this mechanism is only used
+            for testing (against test vectors).
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.ProofGenerationRandomData.#ctor(UProveCrypto.Math.FieldZqElement,UProveCrypto.Math.FieldZqElement[],UProveCrypto.Math.FieldZqElement,UProveCrypto.Math.FieldZqElement[],UProveCrypto.Math.FieldZqElement[])">
+            <summary>
+            Constructs a new <code>ProofGenerationRandomData</code> instance.
+            </summary>
+            <param name="w0">The <code>w0</code> value.</param>
+            <param name="w">The <code>w</code> values.</param>
+            <param name="wd">The <code>wd</code> value if the token is Device-protected; null otherwise.</param>
+            <param name="tildeO">The <code>tildeO</code> values (if attribute commitments are generated).</param>
+            <param name="tildeW">The <code>tildeW</code> values (if attribute commitments are generated).</param>
+        </member>
+        <member name="P:UProveCrypto.ProofGenerationRandomData.W0">
+            <summary>
+            Gets the <code>w0</code> value.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.ProofGenerationRandomData.W">
+            <summary>
+            Gets the <code>w</code> values.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.ProofGenerationRandomData.Wd">
+            <summary>
+            Gets the <code>wd</code> value.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.ProofGenerationRandomData.TildeO">
+            <summary>
+            Gets the <code>tildeO</code> values.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.ProofGenerationRandomData.TildeW">
+            <summary>
+            Gets the <code>tildeW</code> values.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.ProofGenerationRandomData.Clear">
+            <summary>
+            Clears the object.
+            Note that this method does not guarantee the memory will be securely zeroized.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.ProofGenerationRandomData.Generate(System.Int32,System.Int32,UProveCrypto.Math.FieldZq,System.Boolean)">
+            <summary>
+            Generates a <code>ProofGenerationRandomData</code> instance using the internal RNG.
+            </summary>
+            <param name="numUndisclosed">Number of undisclosed attributes.</param>
+            <param name="numCommitted">Number of committed attributes.</param>
+            <param name="Zq">Field Zq</param>
+            <param name="isDeviceProtected">True if a toke is device-protected.</param>
+            <returns>A pregenerated set of random values.</returns>
+        </member>
+        <member name="T:UProveCrypto.CommitmentValues">
+            <summary>
+            Contains the commitment values.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.CommitmentValues.#ctor(UProveCrypto.GroupElement,System.Byte[],UProveCrypto.Math.FieldZqElement)">
+            <summary>
+            Constructs a new instance.
+            </summary>
+            <param name="tildeC">The <code>tildeC</code> value.</param>
+            <param name="tildeA">The <code>tildeA</code> value.</param>
+            <param name="tildeR">The <code>tildeR</code> value.</param>
+        </member>
+        <member name="P:UProveCrypto.CommitmentValues.TildeC">
+            <summary>
+            Gets or sets the <code>tildeC</code> value.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.CommitmentValues.TildeA">
+            <summary>
+            Gets or sets the <code>tildeA</code> value.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.CommitmentValues.TildeR">
+            <summary>
+            Gets or sets the <code>tildeR</code> value.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.CommitmentValues.Equals(System.Object)">
+            <summary>
+            Compare two presentation proofs.
+            </summary>
+            <param name="o">An object to compare against this presentation proof.</param>
+            <returns>True if equal, false otherwise</returns>
+        </member>
+        <member name="M:UProveCrypto.CommitmentValues.GetHashCode">
+            <summary>
+            Get the hash code for this PresentationProof
+            </summary>
+            <returns>the hash code</returns>
+        </member>
+        <member name="T:UProveCrypto.CommitmentPrivateValues">
+            <summary>
+            Contains the commitment private values used by the Prover
+            to perform further proofs on the committed values.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.CommitmentPrivateValues.TildeO">
+            <summary>
+            The <code>tildeO</code> value of the commitments.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.CommitmentPrivateValues.#ctor(UProveCrypto.Math.FieldZqElement[])">
+            <summary>
+            Constructs a new instance.
+            </summary>
+            <param name="tildeO">The <code>tildeO</code> value of the commitments.</param>
+        </member>
+        <member name="T:UProveCrypto.PresentationProof">
+            <summary>
+            Represents a presentation proof.
+            </summary>
+        </member>
+        <member name="F:UProveCrypto.PresentationProof.DeviceAttributeIndex">
+            <summary> A constant to indicate an attribute is stored on the device</summary>
+        </member>
+        <member name="M:UProveCrypto.PresentationProof.#ctor">
+            <summary>
+            Constructs a new <code>PresentationProof</code> instance.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.PresentationProof.#ctor(System.Byte[][],System.Byte[],System.Byte[],UProveCrypto.GroupElement,UProveCrypto.Math.FieldZqElement[],UProveCrypto.CommitmentValues[])">
+            <summary>
+            Constructs a new <code>PresentationProof</code> instance.
+            </summary>
+            <param name="disclosedAttributes">The disclosed attributes.</param>
+            <param name="a">The <code>a</code> value.</param>
+            <param name="ap">The <code>ap</code> value.</param>
+            <param name="ps">The <code>Ps</code> value.</param>
+            <param name="r">The <code>r</code> values.</param>
+            <param name="commitments">The commitments values.</param>
+        </member>
+        <member name="P:UProveCrypto.PresentationProof.DisclosedAttributes">
+            <summary>
+            Gets or sets the disclosed attributes.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.PresentationProof.A">
+            <summary>
+            Gets or sets the <code>a</code> value.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.PresentationProof.Ap">
+            <summary>
+            Gets or sets the <code>ap</code> value.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.PresentationProof.Ps">
+            <summary>
+            Gets or sets the <code>Ps</code> value.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.PresentationProof.R">
+            <summary>
+            Gets or sets the <code>r</code> values.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.PresentationProof.Commitments">
+            <summary>
+            Gets or sets the commitment values.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.PresentationProof.Generate(UProveCrypto.IssuerParameters,System.Int32[],System.Int32[],System.Int32,UProveCrypto.GroupElement,System.Byte[],System.Byte[],UProveCrypto.IDevicePresentationContext,UProveCrypto.UProveKeyAndToken,System.Byte[][],UProveCrypto.ProofGenerationRandomData,UProveCrypto.CommitmentPrivateValues@)">
+            <summary>
+            Generates a presentation proof including optionally presenting a pseudonym, creating attribute commitments, and passing pre-generated random values.
+            </summary>
+            <param name="ip">The issuer parameters corresponding to <code>upkt</code>.</param>
+            <param name="disclosed">An ordered array of disclosed attribute indices.</param>
+            <param name="committed">An ordered array of committed attribute indices.</param>
+            <param name="pseudonymAttribIndex">Index of the attribute used to create a scope-exclusive pseudonym, or 0 if no pseudonym is to be presented. The index must not be part of the disclosed attributes.</param>
+            <param name="gs">The pseudonym scope element, or null if no pseudonym is to be presented.</param>
+            <param name="message">The presentation message.</param>
+            <param name="messageD">The message for the Device, or null.</param>
+            <param name="deviceContext">The active device context, if token is device-protected, or null.</param>
+            <param name="upkt">The U-Proke key and token.</param>
+            <param name="attributes">The token attributes.</param>
+            <param name="preGenW">Optional pregenerated random data for the proof generation.</param>
+            <param name="cpv">Returned commitment private values if commitments are computed.</param>
+            <returns>A presentation proof.</returns>
+        </member>
+        <member name="M:UProveCrypto.PresentationProof.Generate(UProveCrypto.IssuerParameters,System.Int32[],System.Int32[],System.Int32,UProveCrypto.GroupElement,System.Byte[],System.Byte[],UProveCrypto.IDevicePresentationContext,UProveCrypto.UProveKeyAndToken,System.Byte[][],UProveCrypto.ProofGenerationRandomData,UProveCrypto.Math.FieldZqElement[]@)">
+            <summary>
+            Generates a presentation proof including optionally presenting a pseudonym, creating attribute commitments, and passing pre-generated random values.
+            </summary>
+            <param name="ip">The issuer parameters corresponding to <code>upkt</code>.</param>
+            <param name="disclosed">An ordered array of disclosed attribute indices.</param>
+            <param name="committed">An ordered array of committed attribute indices.</param>
+            <param name="pseudonymAttribIndex">Index of the attribute used to create a scope-exclusive pseudonym, or 0 if no pseudonym is to be presented. The index must not be part of the disclosed attributes.</param>
+            <param name="gs">The pseudonym scope element, or null if no pseudonym is to be presented.</param>
+            <param name="message">The presentation message.</param>
+            <param name="messageD">The message for the Device, or null.</param>
+            <param name="deviceContext">The active device context, if token is device-protected, or null.</param>
+            <param name="upkt">The U-Proke key and token.</param>
+            <param name="attributes">The token attributes.</param>
+            <param name="preGenW">Optional pregenerated random data for the proof generation.</param>
+            <param name="tildeO">Returned tildeO values if commitments are computed.</param>
+            <returns>A presentation proof.</returns>
+        </member>
+        <member name="M:UProveCrypto.PresentationProof.Generate(UProveCrypto.IssuerParameters,System.Int32[],System.Int32[],System.Int32,System.Byte[],System.Byte[],System.Byte[],UProveCrypto.IDevicePresentationContext,UProveCrypto.UProveKeyAndToken,System.Byte[][],UProveCrypto.ProofGenerationRandomData,UProveCrypto.Math.FieldZqElement[]@)">
+            <summary>
+            Generates a presentation proof including optionally presenting a pseudonym, creating attribute commitments, and passing pre-generated random values.
+            </summary>
+            <param name="ip">The issuer parameters corresponding to <code>upkt</code>.</param>
+            <param name="disclosed">An ordered array of disclosed attribute indices.</param>
+            <param name="committed">An ordered array of committed attribute indices.</param>
+            <param name="pseudonymAttribIndex">Index of the attribute used to create a scope-exclusive pseudonym, or 0 if no pseudonym is to be presented. The index must not be part of the disclosed attributes.</param>
+            <param name="pseudonymScope">The pseudonym scope, or null if no pseudonym is to be presented.</param>
+            <param name="message">The presentation message.</param>
+            <param name="messageD">The message for the Device, or null.</param>
+            <param name="deviceContext">The active device context, if token is device-protected, or null.</param>
+            <param name="upkt">The U-Proke key and token.</param>
+            <param name="attributes">The token attributes.</param>
+            <param name="preGenW">Optional pregenerated random data for the proof generation.</param>
+            <param name="tildeO">Returned tildeO values if commitments are computed.</param>
+            <returns>A presentation proof.</returns>
+        </member>
+        <member name="M:UProveCrypto.PresentationProof.Generate(UProveCrypto.IssuerParameters,System.Int32[],System.Int32[],System.Int32,System.Byte[],System.Byte[],System.Byte[],UProveCrypto.IDevicePresentationContext,UProveCrypto.UProveKeyAndToken,System.Byte[][],UProveCrypto.Math.FieldZqElement[]@)">
+            <summary>
+            Generates a presentation proof including optionally presenting a pseudonym, and creating attribute commitments.
+            </summary>
+            <param name="ip">The issuer parameters corresponding to <code>upkt</code>.</param>
+            <param name="disclosed">An ordered array of disclosed attribute indices.</param>
+            <param name="committed">An ordered array of committed attribute indices.</param>
+            <param name="pseudonymAttribIndex">Index of the attribute used to create a scope-exclusive pseudonym, or 0 if no pseudonym is to be presented. The index must not be part of the disclosed attributes.</param>
+            <param name="pseudonymScope">The pseudonym scope, or null if no pseudonym is to be presented.</param>
+            <param name="message">The presentation message.</param>
+            <param name="messageD">The message for the Device, or null.</param>
+            <param name="deviceContext">The active device context, if token is device-protected, or null.</param>
+            <param name="upkt">The U-Proke key and token.</param>
+            <param name="attributes">The token attributes.</param>
+            <param name="tildeO">Returned tildeO values if commitments are computed.</param>
+            <returns>A presentation proof.</returns>
+        </member>
+        <member name="M:UProveCrypto.PresentationProof.Generate(UProveCrypto.IssuerParameters,System.Int32[],System.Byte[],System.Byte[],UProveCrypto.IDevicePresentationContext,UProveCrypto.UProveKeyAndToken,System.Byte[][])">
+            <summary>
+            Generates a presentation proof.
+            </summary>
+            <param name="ip">The issuer parameters corresponding to <code>upkt</code>.</param>
+            <param name="disclosed">An ordered array of disclosed attribute indices.</param>
+            <param name="message">The presentation message.</param>
+            <param name="messageD">The message for the Device, or null.</param>
+            <param name="deviceContext">The active device context, if token is device-protected, or null.</param>
+            <param name="upkt">The U-Proke key and token.</param>
+            <param name="attributes">The token attributes.</param>
+            <returns>A presentation proof.</returns>
+        </member>
+        <member name="M:UProveCrypto.PresentationProof.Generate(UProveCrypto.ProverPresentationProtocolParameters,UProveCrypto.CommitmentPrivateValues@)">
+            <summary>
+            Generates a presentation proof.
+            </summary>
+            <param name="pppp">The Prover presentation parameters.</param>
+            <param name="cpv">Returned commitment private values if commitments are computed.</param>
+            <returns>A presentation proof.</returns>
+        </member>
+        <member name="M:UProveCrypto.PresentationProof.Generate(UProveCrypto.ProverPresentationProtocolParameters)">
+            <summary>
+            Generates a presentation proof.
+            </summary>
+            <param name="pppp">The Prover presentation parameters.</param>
+            <returns>A presentation proof.</returns>
+        </member>
+        <member name="M:UProveCrypto.PresentationProof.Verify(UProveCrypto.IssuerParameters,System.Int32[],System.Byte[],System.Byte[],UProveCrypto.UProveToken)">
+            <summary>
+            Verifies a presentation proof.
+            </summary>
+            <param name="ip">The issuer parameters associated with <code>upt</code>.</param>
+            <param name="disclosed">An ordered array of disclosed attribute indices.</param>
+            <param name="message">The presentation message.</param>
+            <param name="messageD">The message for the Device, or null.</param>
+            <param name="upt">The U-Prove token.</param>
+            <exception cref="T:UProveCrypto.InvalidUProveArtifactException">Thrown if the proof is invalid.</exception>
+        </member>
+        <member name="M:UProveCrypto.PresentationProof.Verify(UProveCrypto.IssuerParameters,System.Int32[],System.Int32[],System.Int32,UProveCrypto.GroupElement,System.Byte[],System.Byte[],UProveCrypto.UProveToken)">
+            <summary>
+            Verifies a presentation proof with a presented pseudonym and committed values.
+            </summary>
+            <param name="ip">The issuer parameters associated with <code>upt</code>.</param>
+            <param name="disclosed">An ordered array of disclosed attribute indices.</param>
+            <param name="committed">An ordered array of committed attribute indices.</param>
+            <param name="pseudonymAttribIndex">Index of the attribute used to create a scope-exclusive pseudonym, or 0 if no pseudonym is to be presented. The index must not be part of the disclosed attributes.</param>
+            <param name="gs">The pseudonym scope element, or null if no pseudonym is to be presented.</param>
+            <param name="message">The presentation message.</param>
+            <param name="messageD">The message for the Device, or null.</param>
+            <param name="upt">The U-Prove token.</param>
+            <exception cref="T:UProveCrypto.InvalidUProveArtifactException">Thrown if the proof is invalid.</exception>
+        </member>
+        <member name="M:UProveCrypto.PresentationProof.Verify(UProveCrypto.IssuerParameters,System.Int32[],System.Int32[],System.Int32,System.Byte[],System.Byte[],System.Byte[],UProveCrypto.UProveToken)">
+            <summary>
+            Verifies a presentation proof with a presented pseudonym and committed values.
+            </summary>
+            <param name="ip">The issuer parameters associated with <code>upt</code>.</param>
+            <param name="disclosed">An ordered array of disclosed attribute indices.</param>
+            <param name="committed">An ordered array of committed attribute indices.</param>
+            <param name="pseudonymAttribIndex">Index of the attribute used to create a scope-exclusive pseudonym, or 0 if no pseudonym is to be presented. The index must not be part of the disclosed attributes.</param>
+            <param name="pseudonymScope">The pseudonym scope, or null if no pseudonym is to be presented.</param>
+            <param name="message">The presentation message.</param>
+            <param name="messageD">The message for the Device, or null.</param>
+            <param name="upt">The U-Prove token.</param>
+            <exception cref="T:UProveCrypto.InvalidUProveArtifactException">Thrown if the proof is invalid.</exception>
+        </member>
+        <member name="M:UProveCrypto.PresentationProof.Verify(UProveCrypto.VerifierPresentationProtocolParameters)">
+            <summary>
+            Verifies a presentation proof.
+            </summary>
+            <param name="vppp">The verifier presentation protocol parameters.</param>
+            <exception cref="T:UProveCrypto.InvalidUProveArtifactException">Thrown if the proof is invalid.</exception>
+        </member>
+        <member name="T:UProveCrypto.ProtocolHelper">
+            <summary>
+            Provides some helper functions for the U-Prove protocols.
+            </summary>
+        </member>
+        <member name="T:UProveCrypto.ProtocolHelper.SupportedHashFunctions">
+            <summary>
+            Hash functions supported by U-Prove parameter sets.
+            </summary>
+        </member>
+        <member name="F:UProveCrypto.ProtocolHelper.SupportedHashFunctions.SHA1">
+            <summary> SHA-1 </summary>
+        </member>
+        <member name="F:UProveCrypto.ProtocolHelper.SupportedHashFunctions.SHA256">
+            <summary> SHA-256 </summary>
+        </member>
+        <member name="F:UProveCrypto.ProtocolHelper.SupportedHashFunctions.SHA384">
+            <summary> SHA-384 </summary>
+        </member>
+        <member name="F:UProveCrypto.ProtocolHelper.SupportedHashFunctions.SHA512">
+            <summary> SHA-512 </summary>
+        </member>
+        <member name="M:UProveCrypto.ProtocolHelper.GenerateIssuerParametersCryptoData(UProveCrypto.IssuerParameters,UProveCrypto.GroupElement[],System.Boolean)">
+            <summary>
+            Generates the Issuer parameters cryptographic data, <code>ip</code> will be updated with the cryptographic data.
+            </summary>
+            <param name="ip">An instanciated Issuer parameters; the Gq and E properties must be set.</param>
+            <param name="gValues">The issuer generators to use, or null.</param>
+            <param name="supportDevice">Indicates if the device generator must be generated.</param>
+            <returns>The Issuer parameters private key.</returns>
+        </member>
+        <member name="M:UProveCrypto.ProtocolHelper.VerifyIssuerParameters(UProveCrypto.IssuerParameters,System.Boolean)">
+            <summary>
+            Verifies the Issuer parameters.
+            </summary>
+            <param name="ip">The Issuer parameters to verify.</param>
+            <param name="usesRecommededParameters">If true then use recommended parameters.</param>
+        </member>
+        <member name="M:UProveCrypto.ProtocolHelper.ComputeXi(UProveCrypto.IssuerParameters,System.Int32,System.Byte[])">
+            <summary>
+            Computes the value <c>x_i</c>.
+            </summary>
+            <param name="ip">The issuer paramters.</param>
+            <param name="i">The 0-base index of the attribute.</param>
+            <param name="A">An array contianing the attributes.</param>
+            <returns>The <c>x_i</c> attribute value.</returns>
+        </member>
+        <member name="M:UProveCrypto.ProtocolHelper.VerifyTokenSignature(UProveCrypto.IssuerParameters,UProveCrypto.UProveToken)">
+            <summary>
+            Verifies a U-Prove token signature.
+            </summary>
+            <param name="ip">The Issuer parameters corresponding to the U-Prove token.</param>
+            <param name="upt">The U-Prove token to verify.</param>
+            <exception cref="T:UProveCrypto.InvalidUProveArtifactException">If the U-Prove token is invalid.</exception>
+        </member>
+        <member name="M:UProveCrypto.ProtocolHelper.ComputeTokenID(UProveCrypto.IssuerParameters,UProveCrypto.UProveToken)">
+            <summary>
+            Computes the U-Prove token identifier.
+            </summary>
+            <param name="ip">The issuer parameters associated with <code>upt</code>.</param>
+            <param name="upt">The U-Prove token from which to compute the identifier.</param>
+            <returns>
+            </returns>
+        </member>
+        <member name="M:UProveCrypto.ProtocolHelper.ComputeIssuanceInput(UProveCrypto.IssuerParameters,System.Byte[][],System.Byte[],UProveCrypto.GroupElement)">
+            <summary>
+            Computes the value <c>gamma</c>, an input to the issuance protocol.
+            </summary>
+            <param name="ip">The issuer parameters</param>
+            <param name="A"> The attribute values, or null if the token contains no attributes </param>
+            <param name="TI">The token information field</param>
+            <param name="hd">The device public key, or <c>null</c> if device binding is not supported by the issuer paramters.</param>
+            <returns>The group element gamma </returns>
+        </member>
+        <member name="M:UProveCrypto.ProtocolHelper.GetHashOID(UProveCrypto.ProtocolHelper.SupportedHashFunctions)">
+            <summary>
+            Return a string representation of the OID for the hash function <c>hashAlg</c></summary>
+            <param name="hashAlg">a hash function</param>
+            <returns>A string representaiton of the hash function's OID.</returns>
+        </member>
+        <member name="M:UProveCrypto.ProtocolHelper.GenerateScopeElement(UProveCrypto.Group,System.Byte[])">
+            <summary>
+            Create the group element associated with a scope.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.ProtocolHelper.Concatenate(System.Byte[],System.Byte[])">
+            <summary>
+            Concatenate two byte arrays.
+            </summary>
+            <returns>A new array containing the concatenation of the inputs.</returns>
+        </member>
+        <member name="T:UProveCrypto.ProverRandomData">
+            <summary>
+            Specifies the Prover random data for the issuance protocol, if provided externally.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.ProverRandomData.#ctor">
+            <summary>
+            Constructs a new <code>ProverRandomData</code> instance.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.ProverRandomData.#ctor(UProveCrypto.Math.FieldZqElement[],UProveCrypto.Math.FieldZqElement[],UProveCrypto.Math.FieldZqElement[],UProveCrypto.Math.FieldZqElement)">
+            <summary>
+            Constructs a new <code>ProverRandomData</code> instance.
+            </summary>
+            <param name="alpha">An array of alpha values.</param>
+            <param name="beta1">An array of beta1 values.</param>
+            <param name="beta2">An array of beta2 values.</param>
+            <param name="beta0">A beta0 value. Defaults to <code>null</code>.</param>
+        </member>
+        <member name="P:UProveCrypto.ProverRandomData.Alpha">
+            <summary>
+            Gets or sets the alpha array.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.ProverRandomData.Beta0">
+            <summary>
+            Gets or sets the beta0 value.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.ProverRandomData.Beta1">
+            <summary>
+            Gets or sets the beta1 array.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.ProverRandomData.Beta2">
+            <summary>
+            Gets or sets the beta2 array.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.ProverRandomData.Validate">
+            <summary>
+            Validates the consistency of the object.
+            </summary>
+        </member>
+        <member name="T:UProveCrypto.ProverProtocolParameters">
+            <summary>
+            Issuance protocol parameters for the Prover.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.ProverProtocolParameters.Beta0">
+            <summary>
+            Blinding value used to hide gamma, i.e., compute h_0 = gamma^beta0.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.ProverProtocolParameters.#ctor(UProveCrypto.IssuerParameters)">
+            <summary>
+            Constructs new issuance protocol parameters for the Prover.
+            </summary>
+            <param name="ip">The Issuer parameters.</param>
+        </member>
+        <member name="P:UProveCrypto.ProverProtocolParameters.IssuerParameters">
+            <summary>
+            The Issuer parameters.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.ProverProtocolParameters.ProverInformation">
+            <summary>
+            The Prover information field value. Can be <code>null</code>.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.ProverProtocolParameters.ProverRandomData">
+            <summary>
+            The pregenerated Prover randomizers. Can be <code>null</code>.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.ProverProtocolParameters.BlindGamma">
+            <summary>
+                <code>True</code> to blind the gamma value, to send to the issuer in the collaborative
+            issuance setting; false otherwise (default). If <code>true</code>, the blinded gamma
+            value can be retrieved from the <code>Prover.BlindedGamma</code> property.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.ProverProtocolParameters.BatchValidationSecurityLevel">
+            <summary>
+            The security level of the batch token signature validation. Given a security level <code>l</code>,
+            the probability for the Prover to accept an invalid token is <code>2^-l</code>. If set to 0, than
+            regular validation is used. A minimum value of 20 is recommended.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.ProverProtocolParameters.Validate">
+            <summary>
+            Validates the issuance parameters.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.ProverProtocolParameters.CreateProver">
+            <summary>
+            Creates an Prover instance.
+            </summary>
+            <returns>A Prover instance.</returns>
+        </member>
+        <member name="T:UProveCrypto.PostSecondMessageState">
+            <summary>
+            Issuance state after the second message generation. This
+            object can be used to re-instanciate a <code>Prover</code> instance
+            that can complete the token issuance.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.PostSecondMessageState.#ctor">
+            <summary>
+            Constructs a <code>PostSecondMessageState</code> instance.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.PostSecondMessageState.TI">
+            <summary>
+            Gets or sets the token information field value.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.PostSecondMessageState.PI">
+            <summary>
+            Gets or sets the prover information field value.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.PostSecondMessageState.AlphaInverse">
+            <summary>
+            Gets or sets the private key value alpha inverse.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.PostSecondMessageState.Beta2">
+            <summary>
+            Gets or sets the beta2 value.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.PostSecondMessageState.H">
+            <summary>
+            Gets or sets the public key value h.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.PostSecondMessageState.SigmaZPrime">
+            <summary>
+            Gets or sets the sigmaZPrime value.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.PostSecondMessageState.SigmaAPrime">
+            <summary>
+            Gets or sets the sigmaAPrime value.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.PostSecondMessageState.SigmaBPrime">
+            <summary>
+            Gets or sets the sigmaBPrime value.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.PostSecondMessageState.SigmaCPrime">
+            <summary>
+            Gets or sets the sigmaCPrime value.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.PostSecondMessageState.IsDeviceProtected">
+            <summary>
+            Gets or sets the boolean indicating if the token is Device-protected.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.PostSecondMessageState.Validate">
+            <summary>
+            Validates that the fields are consistent.
+            </summary>
+        </member>
+        <member name="T:UProveCrypto.Prover">
+            <summary>
+            Implements the <code>Prover</code> side of the U-Prove issuance protocol. One instance must be created for
+            each run of the issuance protocol, in which many U-Prove tokens can be obtained in parallel.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.Prover.#ctor(UProveCrypto.IssuerParameters,System.Int32,System.Byte[][],System.Byte[],System.Byte[],UProveCrypto.GroupElement)">
+            <summary>
+            Constructs a new <code>Prover</code> instance.
+            </summary>
+            <param name="ip">The Issuer parameters.</param>
+            <param name="numberOfTokens">Number of tokens to issue.</param>
+            <param name="A">The token attribute values.</param>
+            <param name="TI">The token information field value.</param>
+            <param name="PI">The Prover information field value.</param>
+            <param name="hd">The Device public key. If this parameter is non-null, then the issued tokens will be Device-protected.</param>
+        </member>
+        <member name="M:UProveCrypto.Prover.#ctor(UProveCrypto.IssuerParameters,System.Int32,System.Byte[][],System.Byte[],System.Byte[],UProveCrypto.GroupElement,UProveCrypto.ProverRandomData)">
+            <summary>
+            Constructs a new <code>Prover</code> instance.
+            </summary>
+            <param name="ip">The Issuer parameters.</param>
+            <param name="numberOfTokens">Number of tokens to issue.</param>
+            <param name="A">The token attribute values.</param>
+            <param name="TI">The token information field value.</param>
+            <param name="PI">The Prover information field value.</param>
+            <param name="hd">The Device public key. If this parameter is non-null, then the issued tokens will be Device-protected.</param>
+            <param name="preGeneratedRandomData">Optional pregenerated ProverRandomData instance.</param>
+        </member>
+        <member name="M:UProveCrypto.Prover.#ctor(UProveCrypto.IssuerParameters,UProveCrypto.PostSecondMessageState)">
+            <summary>
+            Constructs a new <code>Prover</code> instance.
+            </summary>
+            <param name="ip">The Issuer parameters.</param>
+            <param name="psms">The post second message state.</param>
+        </member>
+        <member name="M:UProveCrypto.Prover.#ctor(UProveCrypto.IssuerParameters,System.Int32,UProveCrypto.GroupElement,System.Byte[],System.Byte[],UProveCrypto.ProverRandomData,System.Boolean,System.UInt16,UProveCrypto.Math.FieldZqElement)">
+            <summary>
+            Constructs a new <code>Prover</code> instance.
+            </summary>
+            <param name="ip">The Issuer parameters.</param>
+            <param name="numberOfTokens">Number of tokens to issue.</param>
+            <param name="gamma">The gamma value encoding the token attributes. If <c>beta0</c> is non-null, then this value is blinded with <c>beta0</c>.</param>
+            <param name="TI">The token information field value.</param>
+            <param name="PI">The Prover information field value.</param>
+            <param name="preGeneratedRandomData">Optional pregenerated ProverRandomData instance.</param>
+            <param name="isDeviceProtected">True if the token is to be device-protected, false otherwise.</param>
+            <param name="batchValidationSecurityLevel">The security level of the batch token signature validation. Given a security level <code>l</code>,
+            the probability for the Prover to accept an invalid token is <code>2^-l</code>. If set to 0, than
+            regular validation is used. A value of 20 is recommended.</param>
+            <param name="beta0">Non-null if the input <c>gamma</c> value is blinded (collaborative issuance, i.e., the input <c>gamma</c> is blinded with beta0).
+            This parameter defaults to null if ommitted. </param>
+        </member>
+        <member name="M:UProveCrypto.Prover.GenerateSecondMessage(UProveCrypto.FirstIssuanceMessage)">
+            <summary>
+            Generates the second issuance message.
+            </summary>
+            <param name="message">The first issuance message.</param>
+            <returns>The second issuance message.</returns>
+        </member>
+        <member name="M:UProveCrypto.Prover.ExportPostSecondMessageState">
+            <summary>
+            Get the issuance state after the second message generation.
+            </summary>
+            <returns>The issuance state after the second message generation.</returns>
+        </member>
+        <member name="M:UProveCrypto.Prover.GenerateTokens(UProveCrypto.ThirdIssuanceMessage,System.Boolean)">
+            <summary>
+            Generates the U-Prove key and tokens.
+            </summary>
+            <param name="message">The third issuance message.</param>
+            <param name="skipTokenValidation">Set to <code>true</code> to skip token validation;
+            <code>false</code> otherwise. Token validation SHOULD be performed before use, either
+            by setting <code>skipTokenValidation</code> to <code>false</code>, or by later using the
+            <code>ProtocolHelper.VerifyTokenSignature</code> method.
+            </param>
+            <exception cref="T:UProveCrypto.InvalidUProveArtifactException">If the token signature is invalid.</exception>
+            <returns>An array of U-Prove keys and tokens</returns>
+        </member>
+        <member name="T:UProveCrypto.UProveKeyAndToken">
+            <summary>
+            Represents a U-Prove key and token.
+            </summary>
+        </member>
+        <member name="M:UProveCrypto.UProveKeyAndToken.#ctor">
+            <summary>
+            Constructs a new <code>UProveKeyAndToken</code> instance.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.UProveKeyAndToken.Token">
+            <summary>
+            Gets or sets the U-Prove token.
+            </summary>
+        </member>
+        <member name="P:UProveCrypto.UProveKeyAndToken.PrivateKey">
+            <summary>
+            Gets or sets the public key.
+            </summary>
+        </member>
+    </members>
+</doc>

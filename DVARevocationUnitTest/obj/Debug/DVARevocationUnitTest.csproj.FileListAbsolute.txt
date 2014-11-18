@@ -1,0 +1,9 @@
+\\psf\Home\Desktop\UProve\UProveExtensionsSDK\DVARevocationUnitTest\bin\Debug\DVARevocationUnitTest.dll
+\\psf\Home\Desktop\UProve\UProveExtensionsSDK\DVARevocationUnitTest\bin\Debug\DVARevocationUnitTest.pdb
+\\psf\Home\Desktop\UProve\UProveExtensionsSDK\DVARevocationUnitTest\bin\Debug\bc-trimmed.dll
+\\psf\Home\Desktop\UProve\UProveExtensionsSDK\DVARevocationUnitTest\bin\Debug\DVARevocation.dll
+\\psf\Home\Desktop\UProve\UProveExtensionsSDK\DVARevocationUnitTest\bin\Debug\UProveCrypto.dll
+\\psf\Home\Desktop\UProve\UProveExtensionsSDK\DVARevocationUnitTest\bin\Debug\DVARevocation.pdb
+\\psf\Home\Desktop\UProve\UProveExtensionsSDK\DVARevocationUnitTest\obj\Debug\DVARevocationUnitTest.csprojResolveAssemblyReference.cache
+\\psf\Home\Desktop\UProve\UProveExtensionsSDK\DVARevocationUnitTest\obj\Debug\DVARevocationUnitTest.dll
+\\psf\Home\Desktop\UProve\UProveExtensionsSDK\DVARevocationUnitTest\obj\Debug\DVARevocationUnitTest.pdb

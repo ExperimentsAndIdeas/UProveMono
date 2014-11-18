@@ -1,0 +1,15 @@
+/Users/Chris/Desktop/UProve/UProveExtensionsSDK/PolyProof/obj/Debug/.NETFramework,Version=v4.0.AssemblyAttribute.cs
+/Users/Chris/Desktop/UProve/UProveExtensionsSDK/PolyProof/bin/Debug/PolyProof.dll.mdb
+/Users/Chris/Desktop/UProve/UProveExtensionsSDK/PolyProof/bin/Debug/PolyProof.dll
+/Users/Chris/Desktop/UProve/UProveExtensionsSDK/PolyProof/obj/Debug/PolyProof.dll
+/Users/Chris/Desktop/UProve/UProveExtensionsSDK/PolyProof/obj/Debug/PolyProof.dll.mdb
+/Users/Chris/Desktop/UProve/UProveExtensionsSDK/PolyProof/bin/Debug/bc-trimmed.dll
+/Users/Chris/Desktop/UProve/UProveExtensionsSDK/PolyProof/bin/Debug/UProveCrypto.dll
+/Users/Chris/Desktop/UProve/UProveExtensionsSDK/PolyProof/bin/Debug/crypto.dll
+/Users/Chris/Desktop/UProve/UProveExtensionsSDK/PolyProof/bin/Debug/crypto.xml
+/Users/Chris/Desktop/UProve/UProveExtensionsSDK/PolyProof/bin/Debug/nunit.core.dll
+/Users/Chris/Desktop/UProve/UProveExtensionsSDK/PolyProof/bin/Debug/nunit.framework.dll
+/Users/Chris/Desktop/UProve/UProveExtensionsSDK/PolyProof/bin/Debug/nunit.core.interfaces.dll
+/Users/Chris/Desktop/UProve/UProveExtensionsSDK/PolyProof/bin/Debug/UProveCrypto.dll.mdb
+/Users/Chris/Desktop/UProve/UProveExtensionsSDK/PolyProof/bin/Debug/UProveCrypto.xml
+/Users/Chris/Desktop/UProve/UProveExtensionsSDK/PolyProof/bin/Debug/crypto.dll.mdb

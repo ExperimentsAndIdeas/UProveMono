@@ -1,0 +1,15 @@
+/Users/Chris/Desktop/UProve/UProveExtensionsSDK/DVARevocation/obj/Debug/.NETFramework,Version=v4.0.AssemblyAttribute.cs
+/Users/Chris/Desktop/UProve/UProveExtensionsSDK/DVARevocation/bin/Debug/DVARevocation.dll.mdb
+/Users/Chris/Desktop/UProve/UProveExtensionsSDK/DVARevocation/bin/Debug/DVARevocation.dll
+/Users/Chris/Desktop/UProve/UProveExtensionsSDK/DVARevocation/obj/Debug/DVARevocation.dll
+/Users/Chris/Desktop/UProve/UProveExtensionsSDK/DVARevocation/obj/Debug/DVARevocation.dll.mdb
+/Users/Chris/Desktop/UProve/UProveExtensionsSDK/DVARevocation/bin/Debug/bc-trimmed.dll
+/Users/Chris/Desktop/UProve/UProveExtensionsSDK/DVARevocation/bin/Debug/UProveCrypto.dll
+/Users/Chris/Desktop/UProve/UProveExtensionsSDK/DVARevocation/bin/Debug/crypto.dll
+/Users/Chris/Desktop/UProve/UProveExtensionsSDK/DVARevocation/bin/Debug/crypto.xml
+/Users/Chris/Desktop/UProve/UProveExtensionsSDK/DVARevocation/bin/Debug/nunit.core.dll
+/Users/Chris/Desktop/UProve/UProveExtensionsSDK/DVARevocation/bin/Debug/nunit.framework.dll
+/Users/Chris/Desktop/UProve/UProveExtensionsSDK/DVARevocation/bin/Debug/nunit.core.interfaces.dll
+/Users/Chris/Desktop/UProve/UProveExtensionsSDK/DVARevocation/bin/Debug/UProveCrypto.dll.mdb
+/Users/Chris/Desktop/UProve/UProveExtensionsSDK/DVARevocation/bin/Debug/UProveCrypto.xml
+/Users/Chris/Desktop/UProve/UProveExtensionsSDK/DVARevocation/bin/Debug/crypto.dll.mdb

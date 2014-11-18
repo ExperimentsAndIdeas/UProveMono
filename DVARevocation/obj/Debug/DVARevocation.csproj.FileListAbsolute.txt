@@ -1,0 +1,14 @@
+\\psf\Home\Desktop\UProve\UProveExtensionsSDK\DVARevocation\bin\Debug\DVARevocation.dll
+\\psf\Home\Desktop\UProve\UProveExtensionsSDK\DVARevocation\bin\Debug\DVARevocation.pdb
+\\psf\Home\Desktop\UProve\UProveExtensionsSDK\DVARevocation\bin\Debug\UProveCrypto.dll
+\\psf\Home\Desktop\UProve\UProveExtensionsSDK\DVARevocation\obj\Debug\DVARevocation.csprojResolveAssemblyReference.cache
+\\psf\Home\Desktop\UProve\UProveExtensionsSDK\DVARevocation\obj\Debug\DVARevocation.dll
+\\psf\Home\Desktop\UProve\UProveExtensionsSDK\DVARevocation\obj\Debug\DVARevocation.pdb
+\\psf\Home\Desktop\UProve\UProveExtensionsSDK\DVARevocation\bin\Debug\crypto.dll
+\\psf\Home\Desktop\UProve\UProveExtensionsSDK\DVARevocation\bin\Debug\nunit.core.dll
+\\psf\Home\Desktop\UProve\UProveExtensionsSDK\DVARevocation\bin\Debug\nunit.framework.dll
+\\psf\Home\Desktop\UProve\UProveExtensionsSDK\DVARevocation\bin\Debug\nunit.core.interfaces.dll
+\\psf\Home\Desktop\UProve\UProveExtensionsSDK\DVARevocation\bin\Debug\crypto.pdb
+\\psf\Home\Desktop\UProve\UProveExtensionsSDK\DVARevocation\bin\Debug\crypto.xml
+\\psf\Home\Desktop\UProve\UProveExtensionsSDK\DVARevocation\bin\Debug\UProveCrypto.pdb
+\\psf\Home\Desktop\UProve\UProveExtensionsSDK\DVARevocation\bin\Debug\UProveCrypto.xml
