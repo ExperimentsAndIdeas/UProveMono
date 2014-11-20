@@ -90,7 +90,7 @@ namespace UProveSample
             ipp.NumberOfTokens = numOfTokens;
             ipp.TokenInformation = ti;
             Issuer issuer = ipp.CreateIssuer();
-            string firstMessage = ip.Serialize<FirstIssuanceMessage>(issuer.GenerateFirstMessage());
+            string firstMessage = CryptoSerializer.Serialize<FirstIssuanceMessage>(issuer.GenerateFirstMessage());
 
             // setup the prover and generate the second issuance message
             ProverProtocolParameters ppp = new ProverProtocolParameters(ip);
@@ -99,10 +99,10 @@ namespace UProveSample
             ppp.TokenInformation = ti;
             ppp.ProverInformation = pi;
             Prover prover = ppp.CreateProver();
-            string secondMessage = ip.Serialize<SecondIssuanceMessage>(prover.GenerateSecondMessage(ip.Deserialize<FirstIssuanceMessage>(firstMessage)));
+            string secondMessage = CryptoSerializer.Serialize<SecondIssuanceMessage>(prover.GenerateSecondMessage(ip.Deserialize<FirstIssuanceMessage>(firstMessage)));
 
             // generate the third issuance message
-            string thirdMessage = ip.Serialize<ThirdIssuanceMessage>(issuer.GenerateThirdMessage(ip.Deserialize<SecondIssuanceMessage>(secondMessage)));
+            string thirdMessage = CryptoSerializer.Serialize<ThirdIssuanceMessage>(issuer.GenerateThirdMessage(ip.Deserialize<SecondIssuanceMessage>(secondMessage)));
 
             // generate the tokens
             return prover.GenerateTokens(ip.Deserialize<ThirdIssuanceMessage>(thirdMessage));
@@ -123,7 +123,7 @@ namespace UProveSample
             CommitmentPrivateValues cpv;
 
             // generate the presentation proof
-            string token = ip.Serialize<UProveToken>(upkt.Token);
+            string token = CryptoSerializer.Serialize<UProveToken>(upkt.Token);
             pppp = new ProverPresentationProtocolParameters(ip, disclosed, message, upkt, attributes);
             pppp.Committed = committed;
             // if a scope is defined, we use the first attribute to derive a scope exclusive pseudonym            
@@ -134,7 +134,7 @@ namespace UProveSample
                 pppp.SetDeviceData(deviceMessage, device.GetPresentationContext());
             }
             proof = PresentationProof.Generate(pppp, out cpv);
-            string jsonProof = ip.Serialize<PresentationProof>(proof);
+            string jsonProof = CryptoSerializer.Serialize<PresentationProof>(proof);
 
             // verify the presentation proof
             vppp = new VerifierPresentationProtocolParameters(ip, disclosed, message, ip.Deserialize<UProveToken>(token));
@@ -449,7 +449,7 @@ namespace UProveSample
             RevocationWitness witness = RA.ComputeRevocationWitness(
                 revocationSet,
                 RevocationAuthority.ComputeRevocationValue(ip, revocationAttributeIndex, attributes[revocationAttributeIndex - 1]));
-            string witnessJSON = ip.Serialize<RevocationWitness>(witness); // sent to Prover
+            string witnessJSON = CryptoSerializer.Serialize<RevocationWitness>(witness); // sent to Prover
             RevocationWitness receivedWitness = ip.Deserialize<RevocationWitness>(witnessJSON);
 
             //
@@ -468,9 +468,9 @@ namespace UProveSample
             pppp.Committed = committed;
             PresentationProof presentationProof = PresentationProof.Generate(pppp, out cpv);
             NonRevocationProof nrp = RevocationUser.GenerateNonRevocationProof(ip, rap, receivedWitness, revocationCommitmentIndex, presentationProof, cpv, revocationAttributeIndex, attributes);
-            string tokenJSON = ip.Serialize<UProveToken>(upkt[usedToken].Token);
-            string proofJSON = ip.Serialize<PresentationProof>(presentationProof);
-            string nrProofJSON = ip.Serialize<NonRevocationProof>(nrp);
+            string tokenJSON = CryptoSerializer.Serialize<UProveToken>(upkt[usedToken].Token);
+            string proofJSON = CryptoSerializer.Serialize<PresentationProof>(presentationProof);
+            string nrProofJSON = CryptoSerializer.Serialize<NonRevocationProof>(nrp);
 
             // Verify the presentation and non-revocation proof 
             UProveToken receivedToken = ip.Deserialize<UProveToken>(tokenJSON);
@@ -510,9 +510,9 @@ namespace UProveSample
             // Generate and serialize revocation proof. Alice will try using the old witness she created for the previous
             // revocation list, that was current when she wasn't revoked. 
             nrp = RevocationUser.GenerateNonRevocationProof(ip, rap, receivedWitness, revocationCommitmentIndex, presentationProof, cpv, revocationAttributeIndex, attributes);
-            tokenJSON = ip.Serialize<UProveToken>(upkt[usedToken].Token);
-            proofJSON = ip.Serialize<PresentationProof>(presentationProof);
-            nrProofJSON = ip.Serialize<NonRevocationProof>(nrp);
+            tokenJSON = CryptoSerializer.Serialize<UProveToken>(upkt[usedToken].Token);
+            proofJSON = CryptoSerializer.Serialize<PresentationProof>(presentationProof);
+            nrProofJSON = CryptoSerializer.Serialize<NonRevocationProof>(nrp);
 
             WriteLine("The verification of the presentation proof still passes");
             receivedToken = ip.Deserialize<UProveToken>(tokenJSON);
@@ -577,10 +577,10 @@ namespace UProveSample
             pppp.Committed = committed;
             PresentationProof presentationProof = PresentationProof.Generate(pppp, out cpv);
             InequalityProof[] nrProofs = InequalityProof.GenerateUProveInequalityProofs(new EQProofUProveProverData(pppp, cpv, presentationProof, 1), revokedValues);
-            string tokenJSON = ip.Serialize<UProveToken>(upkt[usedToken].Token);
-            string proofJSON = ip.Serialize<PresentationProof>(presentationProof);
+            string tokenJSON = CryptoSerializer.Serialize<UProveToken>(upkt[usedToken].Token);
+            string proofJSON = CryptoSerializer.Serialize<PresentationProof>(presentationProof);
             string[] nrProofJSON = new string[nrProofs.Length];
-            for (int i = 0; i < nrProofs.Length; i++) { nrProofJSON[i] = ip.Serialize<InequalityProof>(nrProofs[i]); }
+            for (int i = 0; i < nrProofs.Length; i++) { nrProofJSON[i] = CryptoSerializer.Serialize<InequalityProof>(nrProofs[i]); }
 
             // Verify the presentation and non-revocation proof 
             UProveToken receivedToken = ip.Deserialize<UProveToken>(tokenJSON);
@@ -733,9 +733,9 @@ namespace UProveSample
                                                                   additionalInfo, proof, cpv, idAttributeIndex, attributes);
 
             // send presentation proof and ciphertext to verifier (send proof and ctext)
-            string tokenJSON = ip.Serialize<UProveToken>(upkt[0].Token);
-            string proofJSON = ip.Serialize<PresentationProof>(proof);
-            string ctextJSON = ip.Serialize<IDEscrowCiphertext>(ctext);
+            string tokenJSON = CryptoSerializer.Serialize<UProveToken>(upkt[0].Token);
+            string proofJSON = CryptoSerializer.Serialize<PresentationProof>(proof);
+            string ctextJSON = CryptoSerializer.Serialize<IDEscrowCiphertext>(ctext);
 
             // verify the presentation proof
             UProveToken vToken = ip.Deserialize<UProveToken>(tokenJSON);
@@ -851,12 +851,12 @@ namespace UProveSample
             ProverPresentationProtocolParameters pppp = new ProverPresentationProtocolParameters(ip, disclosed, message, upkt[0], attributes);
             pppp.Committed = committed;
             PresentationProof proof = PresentationProof.Generate(pppp, out cpv);
-            string tokenJSON = ip.Serialize<UProveToken>(upkt[0].Token);
-            string proofJSON = ip.Serialize<PresentationProof>(proof);
+            string tokenJSON = CryptoSerializer.Serialize<UProveToken>(upkt[0].Token);
+            string proofJSON = CryptoSerializer.Serialize<PresentationProof>(proof);
 
             // generate the set membership proof
             SetMembershipProof setMembershipProof = SetMembershipProof.Generate(pppp, proof, cpv, (int)Attributes.CLEARANCE, AuthorizedClassifications);
-            string setProofJSON = ip.Serialize<SetMembershipProof>(setMembershipProof);
+			string setProofJSON = CryptoSerializer.Serialize<SetMembershipProof>(setMembershipProof);
 
             // verify the presentation proof
             try
@@ -956,8 +956,8 @@ namespace UProveSample
             ProverPresentationProtocolParameters pppp = new ProverPresentationProtocolParameters(ip, disclosed, message, upkt[0], attributes);
             pppp.Committed = committed;
             PresentationProof proof = PresentationProof.Generate(pppp, out cpv);
-            string tokenJSON = ip.Serialize<UProveToken>(upkt[0].Token);
-            string proofJSON = ip.Serialize<PresentationProof>(proof);
+            string tokenJSON = CryptoSerializer.Serialize<UProveToken>(upkt[0].Token);
+            string proofJSON = CryptoSerializer.Serialize<PresentationProof>(proof);
 
             // generate the range proof
             RangeProof rangeProof = new RangeProof(
@@ -968,7 +968,7 @@ namespace UProveSample
                               over21TargetDate,
                               MinBirthdate.Year,
                               MaxBirthdate.Year));
-            string rangeProofJSON = ip.Serialize<RangeProof>(rangeProof);
+            string rangeProofJSON = CryptoSerializer.Serialize<RangeProof>(rangeProof);
 
             // verify the presentation proof
             try
@@ -1010,14 +1010,14 @@ namespace UProveSample
         public static void Main()
         {
 			while (true) {
-			 	SoftwareOnlySample ();
-			 	DeviceSample ();
-			 	AccumulatorRevocationSample ();
-			 	InequalityRevocationSample ();
-			 	IDEscrowSample ();
-  				SetMembershipSample();
+			//	SoftwareOnlySample ();
+			 //	DeviceSample ();
+			 //	AccumulatorRevocationSample ();
+			 //	InequalityRevocationSample ();
+			 //	IDEscrowSample ();
+  				 SetMembershipSample();
  
-                CollaborativeIssuanceAndEqualitySample();
+                //CollaborativeIssuanceAndEqualitySample();
                   RangeProofSample();
 				WriteLine ("Press enter to exit...");
 				Console.ReadLine ();

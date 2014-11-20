@@ -95,7 +95,7 @@ namespace DVARevocationUnitTest
             RevocationAuthority.GenerateRevocationAuthority(SubgroupParameterSets.ParamSet_SG_2048256_V1Name, "SHA-256");
             // set a random accumulator
             RA.Accumulator = RA.RAParameters.gt.Exponentiate(RA.RAParameters.group.FieldZq.GetRandomElement(false));
-            RevocationAuthority RA2 = ip.Deserialize<RevocationAuthority>(ip.Serialize<RevocationAuthority>(RA));
+            RevocationAuthority RA2 = ip.Deserialize<RevocationAuthority>(CryptoSerializer.Serialize<RevocationAuthority>(RA));
 
             Assert.AreEqual(RA.PrivateKey, RA2.PrivateKey);
             Assert.AreEqual(RA.RAParameters.g, RA2.RAParameters.g);

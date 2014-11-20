@@ -13,3 +13,17 @@
 /Users/Chris/Desktop/UProve/UProveExtensionsSDK/DVARevocation/bin/Debug/UProveCrypto.dll.mdb
 /Users/Chris/Desktop/UProve/UProveExtensionsSDK/DVARevocation/bin/Debug/UProveCrypto.xml
 /Users/Chris/Desktop/UProve/UProveExtensionsSDK/DVARevocation/bin/Debug/crypto.dll.mdb
+/Users/Chris/Documents/Git/UProveMono/DVARevocation/obj/Debug/.NETFramework,Version=v4.0.AssemblyAttribute.cs
+/Users/Chris/Documents/Git/UProveMono/DVARevocation/bin/Debug/DVARevocation.dll.mdb
+/Users/Chris/Documents/Git/UProveMono/DVARevocation/bin/Debug/DVARevocation.dll
+/Users/Chris/Documents/Git/UProveMono/DVARevocation/obj/Debug/DVARevocation.dll
+/Users/Chris/Documents/Git/UProveMono/DVARevocation/obj/Debug/DVARevocation.dll.mdb
+/Users/Chris/Documents/Git/UProveMono/DVARevocation/bin/Debug/UProveCrypto.dll
+/Users/Chris/Documents/Git/UProveMono/DVARevocation/bin/Debug/UProveCrypto.dll.mdb
+/Users/Chris/Documents/Git/UProveMono/DVARevocation/bin/Debug/UProveCrypto.xml
+/Users/Chris/Documents/Git/UProveMono/DVARevocation/bin/Debug/crypto.dll
+/Users/Chris/Documents/Git/UProveMono/DVARevocation/bin/Debug/crypto.dll.mdb
+/Users/Chris/Documents/Git/UProveMono/DVARevocation/bin/Debug/crypto.xml
+/Users/Chris/Documents/Git/UProveMono/DVARevocation/bin/Debug/nunit.framework.dll
+/Users/Chris/Documents/Git/UProveMono/DVARevocation/bin/Debug/nunit.core.interfaces.dll
+/Users/Chris/Documents/Git/UProveMono/DVARevocation/bin/Debug/nunit.core.dll

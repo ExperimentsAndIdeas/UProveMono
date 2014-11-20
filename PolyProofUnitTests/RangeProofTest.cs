@@ -720,7 +720,7 @@ namespace PolyProofUnitTests
 
             // serialize the proof
             IssuerParameters ip = new IssuerParameters();
-            string serializedProof = ip.Serialize<RangeProof>(originalProof);
+            string serializedProof = CryptoSerializer.Serialize<RangeProof>(originalProof);
 
             // deserialize the proof
             RangeProof deserializedProof = ip.Deserialize<RangeProof>(serializedProof);

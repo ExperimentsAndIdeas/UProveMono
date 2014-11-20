@@ -49,7 +49,7 @@ namespace UProveCrypto
                 using (MemoryStream ms = new MemoryStream())
                 {
                     DataContractJsonSerializer jsonSerializer =
-                        new DataContractJsonSerializer(typeof(T));
+						new DataContractJsonSerializer(obj.GetType());
 
                     jsonSerializer.WriteObject(ms, obj);
                     ms.Position = 0;

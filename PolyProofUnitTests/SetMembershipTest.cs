@@ -444,7 +444,7 @@ namespace PolyProofUnitTests
 
                 // serialize the proof
                 IssuerParameters ip = new IssuerParameters();
-                string serializedProof = ip.Serialize<SetMembershipProof>(originalProof);
+                string serializedProof = CryptoSerializer.Serialize<SetMembershipProof>(originalProof);
 
                 // deserialize the proof
                 SetMembershipProof deserializedProof = ip.Deserialize<SetMembershipProof>(serializedProof);
@@ -453,7 +453,7 @@ namespace PolyProofUnitTests
                 Assert.IsTrue(deserializedProof.Verify(prover), "deserialized proof does not verify.");
 
                 // serialize the proof again
-                string serializedProof2 = ip.Serialize<SetMembershipProof>(deserializedProof);
+                string serializedProof2 = CryptoSerializer.Serialize<SetMembershipProof>(deserializedProof);
 
                 // make sure the two serialized proofs are equal
                 Assert.AreEqual(serializedProof, serializedProof2, "inconsistent proof serialization.");
